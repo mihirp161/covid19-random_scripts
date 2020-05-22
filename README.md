@@ -1,6 +1,6 @@
 # Covid19 - Random Scripts
 
-This repository is contains random scripts. You can pick them up as you find them useful. For question, refer to the individual listed on the top.            
+This repository contains random scripts. You can pick them up as you find them useful. For question, refer to the individual listed on the top.            
 
 ## Contents
 * R (./R)
