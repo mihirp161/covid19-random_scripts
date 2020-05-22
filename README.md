@@ -1,6 +1,6 @@
 # Covid19 - Random Scripts
 
-This repository is home of the random data collection scripts used in Covid-19 project.       
+This repository is contains random scripts. You can pick them up as you find them useful. For question, refer to the individual listed on the top.            
 
 ## Contents
 * R (./R)
