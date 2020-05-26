@@ -12,6 +12,8 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **clean_the_cleaned_cleaned_csv**- Combines many columns we need and reduces the file size 11X folds. Note, you will need to clean the file later. However using this method, we can pick just one column rather than many columns which is a headache.
 	* **get_title_from_urls**- takes a csv, and replaces urls with title tags in the tweet texts.        
 	* **big-data-splitter-csv**- takes a giant csv and makes many child csv based on the number of rows given.       
+	* **singly_outputcsv_maker_randSampled**- takes all csvs from USC data, and creates output distributable csvs.      
+	
 * python (./python)
 	* **populate_bot_files** - Script for collecting Botometer scores from an output.csv *(this file contains 1 col usernames)*       
 	* **username_cutter** - Reads all the csv files based on a column and returns a big csv. If you want to split that csv
