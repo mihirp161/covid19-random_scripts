@@ -1,3 +1,6 @@
+#FOR USF SAIL
+# ~MIHIR
+
 library(data.table)
 
 # first read all the files in a folder (Give the path to folder (....), ending /)
