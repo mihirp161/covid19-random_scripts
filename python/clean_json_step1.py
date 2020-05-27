@@ -16,10 +16,6 @@ def extract_json(fileobj):
         for line in fileobj:
             yield json.loads(line)
 
-##########################
-# IMPLEMENT PUTTING THE jsol files here!!!!!! OR TEST BY ROWS OR SOMETHING!!!!!!!!!!!!!!!
-#########################
-
 #path to the jsonl file
 data_json = io.open('output-2020-01-21.jsonl', mode='r', encoding='utf-8-sig') # Opens in the JSONL file
 data_python = extract_json(data_json)
@@ -265,9 +261,6 @@ for line in data_python:
     except:
         mentions_id_str = ''
 
-########################
-# PUT QUERY OR STUFF HERE!!!!!!!!!!!!! Process rows based on that
-########################
 
     #writes a row and gets the fields from the json object
     #screen_name and followers/friends are found on the second level hence two get methods
