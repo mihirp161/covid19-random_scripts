@@ -4,6 +4,12 @@
 import json
 import csv
 import io
+import glob
+
+#*************************** NOTE *******************************************#
+# LINE 54, please put month in the csv file name to prevent confusion        #
+# LINE 50, please give the jsonl file name if single file is to be converted #
+#****************************************************************************#
 
 # creates a .csv file using a Twitter .json file
 # the fields have to be set manually
@@ -16,12 +22,36 @@ def extract_json(fileobj):
         for line in fileobj:
             yield json.loads(line)
 
-#path to the jsonl file
-data_json = io.open('output-2020-01-21.jsonl', mode='r', encoding='utf-8-sig') # Opens in the JSONL file
+#Writes into json format
+# result = []
+# for f in glob.glob("folder_with_all_jsonl/*.jsonl"):
+#     with open(f, 'r', encoding='utf-8-sig') as infile:
+#         for line in infile.readlines():
+#             try:
+#                 result.append(json.loads(line)) # read each line of the file
+#             except ValueError:
+#                 print(f)
+#
+# #write the file in BOM TO preserve the emojis and special characters
+# with open('merged_file.json','w', encoding= 'utf-8-sig') as outfile:
+#     json.dump(result, outfile)
+
+#********************** Ignore this if only want to convert single jsonl file ***************#
+#writes into a proper jsonl file
+outfile = open('merged_file.jsonl','w', encoding= 'utf-8-sig')
+for f in glob.glob("SOME_FOLDER/*.jsonl"):
+    with open(f, 'r', encoding='utf-8-sig') as infile:
+        for line in infile.readlines():
+            outfile.write(line)
+outfile.close()
+#*******************************************************************************************#
+
+#path to the jsonl file/s (if you want single json file converted, edit the file name here!)
+data_json = io.open('merged_file.jsonl', mode='r', encoding='utf-8-sig') # Opens in the JSONL file
 data_python = extract_json(data_json)
 
 # write entrire jsonl files (append mode 'a', overwriting mode 'w')
-csv_out = io.open('tweets_out_utf8.csv', mode='w', encoding='utf-8-sig') #opens csv file
+csv_out = io.open('usc_tweets_out_utf8.csv', mode='w', encoding='utf-8-sig') #opens csv file
 
 # field names
 #if you're adding additional columns pleae don't forget to add them here
@@ -260,7 +290,6 @@ for line in data_python:
             mentions_id_str += '"' + val.get('id_str').replace('"', '""') + '"' + '|'
     except:
         mentions_id_str = ''
-
 
     #writes a row and gets the fields from the json object
     #screen_name and followers/friends are found on the second level hence two get methods
