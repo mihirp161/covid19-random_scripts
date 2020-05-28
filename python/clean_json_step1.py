@@ -39,7 +39,7 @@ def extract_json(fileobj):
 #********************** Ignore this if only want to convert single jsonl file ***************#
 #writes into a proper jsonl file
 outfile = open('merged_file.jsonl','w', encoding= 'utf-8-sig')
-for f in glob.glob("SOME_FOLDER/*.jsonl"):
+for f in glob.glob("folder_with_all_jsonl/*.jsonl"):
     with open(f, 'r', encoding='utf-8-sig') as infile:
         for line in infile.readlines():
             outfile.write(line)
@@ -291,54 +291,57 @@ for line in data_python:
     except:
         mentions_id_str = ''
 
-    #writes a row and gets the fields from the json object
-    #screen_name and followers/friends are found on the second level hence two get methods
-    row = [line.get('created_at'),
-           str(line.get('id_str')),
-           '"' + line.get('full_text').replace('"','""') + '"', #creates double quotes
-           in_reply_to_status_id_str,
-           in_reply_to_user_id_str,
-           in_reply_to_screen_name,
-           str(line.get('retweet_count')),
-           str(line.get('favorite_count')),
-           retweeted_status_created_at,
-           retweeted_status_id_str,
-           retweeted_status_full_text,
-           retweets_status_retweet_count,
-           retweets_status_favourite_count,
-           line.get('user').get('id_str'),
-           str(line.get('user').get('screen_name')),
-           user_description,
-           user_location,
-           user_geo,
-           user_coordinates,
-           str(line.get('user').get('followers_count')),
-           str(line.get('user').get('friends_count')),
-           str(line.get('user').get('listed_count')),
-           str(line.get('user').get('statuses_count')),
-           str(line.get('user').get('favourites_count')),
-           str(line.get('user').get('created_at')),
-           retweeted_status_user_id_str,
-           retweeted_status_user_screen_name,
-           retweeted_status_user_description,
-           retweeted_status_user_location,
-           retweeted_status_user_geo,
-           retweeted_status_user_coordinates,
-           retweeted_status_user_follower_count,
-           retweeted_status_user_friends_count,
-           retweeted_status_user_listed_count,
-           retweeted_status_user_statuses_count,
-           retweeted_status_user_favourite_count,
-           retweeted_status_user_retweet_count,
-           retweeted_status_user_profile_creation_date,
-           hastags,
-           mentions,
-           mentions_id_str]
+    #write only the english accounts to file
 
-    #write the row line by line with \n inserted at the end
-    row_joined = u','.join(row)
-    csv_out.write(row_joined)
-    csv_out.write(u'\n')
+    if(line.get('lang') == 'en'):
+        #writes a row and gets the fields from the json object
+        #screen_name and followers/friends are found on the second level hence two get methods
+        row = [line.get('created_at'),
+               str(line.get('id_str')),
+               '"' + line.get('full_text').replace('"','""') + '"', #creates double quotes
+               in_reply_to_status_id_str,
+               in_reply_to_user_id_str,
+               in_reply_to_screen_name,
+               str(line.get('retweet_count')),
+               str(line.get('favorite_count')),
+               retweeted_status_created_at,
+               retweeted_status_id_str,
+               retweeted_status_full_text,
+               retweets_status_retweet_count,
+               retweets_status_favourite_count,
+               line.get('user').get('id_str'),
+               str(line.get('user').get('screen_name')),
+               user_description,
+               user_location,
+               user_geo,
+               user_coordinates,
+               str(line.get('user').get('followers_count')),
+               str(line.get('user').get('friends_count')),
+               str(line.get('user').get('listed_count')),
+               str(line.get('user').get('statuses_count')),
+               str(line.get('user').get('favourites_count')),
+               str(line.get('user').get('created_at')),
+               retweeted_status_user_id_str,
+               retweeted_status_user_screen_name,
+               retweeted_status_user_description,
+               retweeted_status_user_location,
+               retweeted_status_user_geo,
+               retweeted_status_user_coordinates,
+               retweeted_status_user_follower_count,
+               retweeted_status_user_friends_count,
+               retweeted_status_user_listed_count,
+               retweeted_status_user_statuses_count,
+               retweeted_status_user_favourite_count,
+               retweeted_status_user_retweet_count,
+               retweeted_status_user_profile_creation_date,
+               hastags,
+               mentions,
+               mentions_id_str]
+
+        #write the row line by line with \n inserted at the end
+        row_joined = u','.join(row)
+        csv_out.write(row_joined)
+        csv_out.write(u'\n')
 
 #close the csv file for writing
 csv_out.close()
