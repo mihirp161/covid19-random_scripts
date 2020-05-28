@@ -13,6 +13,7 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **get_title_from_urls**- takes a csv, and replaces urls with title tags in the tweet texts.        
 	* **big-data-splitter-csv**- takes a giant csv and makes many child csv based on the number of rows given.       
 	* **singly_outputcsv_maker_randSampled**- takes all csvs from USC data, and creates distributable output csvs for botometer process.      
+	* **keep_processed_bots_only**- fixes the USC's output_YOURNAME.csv file by removing the names which we've processed already.    
 	
 * python (./python)
 	* **populate_bot_files** - Script for collecting Botometer scores from an output.csv *(this file contains 1 col usernames)*       
