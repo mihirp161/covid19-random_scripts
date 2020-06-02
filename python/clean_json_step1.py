@@ -103,10 +103,6 @@ fields = u'tweet_created_at,' \
          # u'quoted_count,' \
          # u'mentions_user_id_str,' \
 
-    #write the column names
-csv_out.write(fields)
-csv_out.write(u'\n')
-
 # This for loop iteratest through json objects, and gets the keys and objects
 # some of the objects do have NULL values (like retweets, mentions etc.) so they're
 # in a try-catch blocks
