@@ -96,9 +96,14 @@ fields = u'tweet_created_at,' \
          u'hashtags,' \
          u'mentions_screen_names,' \
          u'mentions_user_id_str'
+         # u'mentions_user_id_str,' \
+         # u'quoted_created_at,' \
+         # u'quoted_id_str,' \
+         # u'quoted_text,' \
+         # u'quoted_count,' \
+         # u'mentions_user_id_str,' \
 
-
-#write the column names
+    #write the column names
 csv_out.write(fields)
 csv_out.write(u'\n')
 
