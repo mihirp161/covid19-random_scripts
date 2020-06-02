@@ -20,5 +20,6 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **username_cutter** - Reads all the csv files based on a column and returns a big csv. If you want to split that csv
 			    by # of rows, you can uncomment the last lines and do it that way too.  
 	* **text_file_gatherer** - Reads all the smaller USC twitter id texts files and combines them into one day.    
-	* **clean_json_step1** - Reads a jsonl (or many jsonls through merging) from hydrator and remakes a twitter csv in utf-8 BOM format to preserve emojis.  
+	* **clean_json_step1** - Reads a jsonl (or many jsonls through merging) from hydrator and remakes a twitter csv in utf-8 BOM format to preserve emojis.      
+	* **clean_json_step2** - Reads bunch of USC data and botscores we got, and make a 100K csv file with URL being replaced with the url's <title> tag.        
 	
