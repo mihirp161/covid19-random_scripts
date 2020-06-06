@@ -119,14 +119,15 @@ for f in filenames:
              u'retweets_user_favourites_count,' \
              u'retweets_user_retweet_count,' \
              u'retweets_user_profile_creation_at,' \
-             u'hashtags,' \
              u'mentions_screen_names,' \
              u'mentions_user_id_str,' \
+             u'retweet_mentions_screen_names,' \
+             u'retweet_mentions_user_id_str,' \
+             u'quoted_mentions_screen_names,' \
+             u'quoted_mentions_user_id_str,' \
              u'quoted_created_at,' \
              u'quoted_id_str,' \
              u'quoted_text,' \
-             u'quoted_count,' \
-             u'quoted_reply_count,' \
              u'quoted_retweet_count,' \
              u'quoted_favourite_count,' \
              u'quoted_user_id_str,' \
@@ -141,6 +142,7 @@ for f in filenames:
              u'quoted_user_statuses_count,' \
              u'user_verified,' \
              u'retweet_user_verified,' \
+             u'quoted_user_verified,' \
              u'user_place_name,' \
              u'retweet_user_place_name,' \
              u'quote_user_place_name,' \
@@ -306,20 +308,63 @@ for f in filenames:
 
             # retweet user_profile_verified
             try:
-                retweeted_status_user_profile_verified = '"' + line.get('retweeted_status').get('user').get('verified').replace('"', '""') + '"'
+                retweeted_status_user_profile_verified = line.get('retweeted_status').get('user').get('verified')
             except:
                 retweeted_status_user_profile_verified = ''
 
-            #hashtags
+            # quoted user_profile_verified
             try:
-                check_hash_present = line.get('entities').get('hashtags')[0].get('text')
-                temp = line.get('entities').get('hashtags')
-                hastags = ""
-                #looks funky in csv, but when loaded into R or python, it comes correctly (it is encoded with utf-8 BOM)
-                for val in temp:
-                    hastags += '"' + val.get('text').replace('"', '""') + '"' + '|'
+                quoted_status_user_profile_verified = line.get('retweeted_status').get('quoted_status').get('user').get('verified')
             except:
-                hastags = ''
+                quoted_status_user_profile_verified = ''
+
+            # retweeted _stated mentions
+            try:
+                check_mention_present = line.get('retweeted_status').get('entities').get('user_mentions')[0]#.get('text')
+                temp = line.get('retweeted_status').get('entities').get('user_mentions')
+                retweeted_mentions = ""
+                #looks funky in csv, but when loaded into R or python, it comes correctly
+                for val in temp:
+                    #retweeted_mentions += '"' + val.get('screen_name').replace('"', '""') + '"' + '|'
+                    retweeted_mentions= ''.join([retweeted_mentions, str(val.get('screen_name')), '|'])
+            except:
+                retweeted_mentions = ''
+
+            #mentions user_id_str
+            try:
+                check_mention_ids_present = line.get('retweeted_status').get('entities').get('user_mentions')[0]#.get('text')
+                temp = line.get('retweeted_status').get('entities').get('user_mentions')
+                retweeted_mentions_id_str = ""
+                #looks funky in csv, but when loaded into R or python, it comes correctly
+                for val in temp:
+                    #retweeted_mentions_id_str += '"' + val.get('id_str').replace('"', '""') + '"' + '|'
+                    retweeted_mentions_id_str= ''.join([retweeted_mentions_id_str, str(val.get('id_str')), '|'])
+            except:
+                retweeted_mentions_id_str = ''
+
+            #quoted status mentions
+            try:
+                check_mention_present = line.get('retweeted_status').get('quoted_status').get('entities').get('user_mentions')[0]#.get('text')
+                temp = line.get('retweeted_status').get('quoted_status').get('entities').get('user_mentions')
+                quoted_mentions = ""
+                #looks funky in csv, but when loaded into R or python, it comes correctly
+                for val in temp:
+                    #quoted_mentions += '"' + val.get('screen_name').replace('"', '""') + '"' + '|'
+                    quoted_mentions = ''.join([quoted_mentions, str(val.get('screen_name')), '|'])
+            except:
+                quoted_mentions = ''
+
+            #mentions user_id_str
+            try:
+                check_mention_ids_present = line.get('retweeted_status').get('quoted_status').get('entities').get('user_mentions')[0]#.get('text')
+                temp = line.get('retweeted_status').get('quoted_status').get('entities').get('user_mentions')
+                quoted_mentions_id_str = ""
+                #looks funky in csv, but when loaded into R or python, it comes correctly
+                for val in temp:
+                    #quoted_mentions_id_str += '"' + val.get('id_str').replace('"', '""') + '"' + '|'
+                    quoted_mentions_id_str = ''.join([quoted_mentions_id_str, str(val.get('id_str')), '|'])
+            except:
+                quoted_mentions_id_str = ''
 
             #mentions
             try:
@@ -328,7 +373,8 @@ for f in filenames:
                 mentions = ""
                 #looks funky in csv, but when loaded into R or python, it comes correctly
                 for val in temp:
-                    mentions += '"' + val.get('screen_name').replace('"', '""') + '"' + '|'
+                    #mentions += '"' + val.get('screen_name').replace('"', '""') + '"' + '|'
+                    mentions = ''.join([mentions, str(val.get('screen_name')), '|'])
             except:
                 mentions = ''
 
@@ -339,112 +385,101 @@ for f in filenames:
                 mentions_id_str = ""
                 #looks funky in csv, but when loaded into R or python, it comes correctly
                 for val in temp:
-                    mentions_id_str += '"' + val.get('id_str').replace('"', '""') + '"' + '|'
+                    #mentions_id_str += '"' + val.get('id_str').replace('"', '""') + '"' + '|'
+                    mentions_id_str = ''.join([mentions_id_str, str(val.get('id_str')), '|'])
             except:
                 mentions_id_str = ''
 
 
             # quoted created_at
             try:
-                quoted_status_created_at = '"' + line.get('quoted_status').get('created_at').replace('"', '""') + '"'
+                quoted_status_created_at = '"' + line.get('retweeted_status').get('quoted_status').get('created_at').replace('"', '""') + '"'
             except:
                 quoted_status_created_at = ''
 
             # quoted id_str
             try:
-                quoted_status_id_str = '"' + line.get('quoted_status').get('id_str').replace('"', '""') + '"'
+                quoted_status_id_str =  str(line.get('retweeted_status').get('quoted_status').get('id_str'))
             except:
                 quoted_status_id_str = ''
 
             # quoted texts
             try:
-                quoted_status_full_text = '"' + line.get('quoted_status').get('full_text').replace('"', '""') + '"'
+                quoted_status_full_text = '"' + line.get('retweeted_status').get('quoted_status').get('full_text').replace('"', '""') + '"'
             except:
                 quoted_status_full_text = ''
 
-            # quoted count
-            try:
-                quoted_status_count= str(line.get('quoted_status').get('quote_count'))
-            except:
-                quoted_status_count = ''
-
-            # quoted reply_count
-            try:
-                quoted_status_reply_count= str(line.get('quoted_status').get('reply_count'))
-            except:
-                quoted_status_reply_count = ''
-
             # quoted retweet_count
             try:
-                quoted_status_retweet_count= str(line.get('quoted_status').get('retweet_count'))
+                quoted_status_retweet_count= str(line.get('retweeted_status').get('quoted_status').get('retweet_count'))
             except:
                 quoted_status_retweet_count = ''
 
             # quoted favourite_count
             try:
-                quoted_status_favourite_count=  str(line.get('quoted_status').get('favorite_count'))
+                quoted_status_favourite_count=  str(line.get('retweeted_status').get('quoted_status').get('favorite_count'))
             except:
                 quoted_status_favourite_count= ''
 
             # quoted user_id_str
             try:
-                quoted_status_user_id_str = '"' + line.get('quoted_status').get('user').get('id_str').replace('"', '""') + '"'
+                quoted_status_user_id_str = '"' + line.get('retweeted_status').get('quoted_status').get('user').get('id_str').replace('"', '""') + '"'
             except:
                 quoted_status_user_id_str = ''
 
             # quoted user_description
             try:
-                quoted_status_user_description = '"' + line.get('quoted_status').get('user').get('description').replace('"', '""') + '"'
+                quoted_status_user_description = '"' + line.get('retweeted_status').get('quoted_status').get('user').get('description').replace('"', '""') + '"'
             except:
                 quoted_status_user_description  = ''
 
             # quoted user_screen_name
             try:
-                quoted_status_user_screen_name = '"' + line.get('quoted_status').get('user').get('screen_name').replace('"', '""') + '"'
+                quoted_status_user_screen_name = '"' + line.get('retweeted_status').get('quoted_status').get('user').get('screen_name').replace('"', '""') + '"'
             except:
                 quoted_status_user_screen_name = ''
 
             # quoted user_location
             try:
-                quoted_status_user_location = '"' + line.get('quoted_status').get('user').get('location').replace('"', '""') + '"'
+                quoted_status_user_location = '"' + line.get('retweeted_status').get('quoted_status').get('user').get('location').replace('"', '""') + '"'
             except:
                 quoted_status_user_location = ''
 
             # quoted user_coordinates
             try:
-                get_x = str(line.get('quoted_status').get('coordinates').get('coordinates')[0])
-                get_y = str(line.get('quoted_status').get('coordinates').get('coordinates')[1])
+                get_x = str(line.get('retweeted_status').get('quoted_status').get('coordinates').get('coordinates')[0])
+                get_y = str(line.get('retweeted_status').get('quoted_status').get('coordinates').get('coordinates')[1])
                 quoted_status_user_coordinates = ''.join([get_x, '|',get_y])
             except:
                 quoted_status_user_coordinates = ''
 
             # quoted user_followers_count
             try:
-                quoted_status_user_follower_count = str(line.get('quoted_status').get('user').get('followers_count'))
+                quoted_status_user_follower_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('followers_count'))
             except:
                 quoted_status_user_follower_count = ''
 
             # quoted user_friends_count
             try:
-                quoted_status_user_friends_count = str(line.get('quoted_status').get('user').get('friends_count'))
+                quoted_status_user_friends_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('friends_count'))
             except:
                 quoted_status_user_friends_count = ''
 
             # quoted user_listed_count
             try:
-                quoted_status_user_listed_count = str(line.get('quoted_status').get('user').get('listed_count'))
+                quoted_status_user_listed_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('listed_count'))
             except:
                 quoted_status_user_listed_count = ''
 
             # quoted user_statuses_count
             try:
-                quoted_status_user_statuses_count = str(line.get('quoted_status').get('user').get('statuses_count'))
+                quoted_status_user_statuses_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('statuses_count'))
             except:
                 quoted_status_user_statuses_count = ''
 
             # quoted user_favourite_count
             try:
-                quoted_status_user_favourite_count = str(line.get('quoted_status').get('user').get('favourites_count'))
+                quoted_status_user_favourite_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('favourites_count'))
             except:
                 quoted_status_user_favourite_count = ''
 
@@ -462,7 +497,7 @@ for f in filenames:
 
             # quoted user_place_full_name
             try:
-                quoted_status_user_place_name = '"' + line.get('quoted_status').get('place').get('full_name').replace('"', '""') + '"'
+                quoted_status_user_place_name = '"' + line.get('retweeted_status').get('quoted_status').get('place').get('full_name').replace('"', '""') + '"'
             except:
                 quoted_status_user_place_name = ''
 
@@ -480,7 +515,7 @@ for f in filenames:
 
             # quoted user_place country_code
             try:
-                quoted_user_country_code = '"' + line.get('quoted_status').get('place').get('country_code').replace('"', '""') + '"'
+                quoted_user_country_code = '"' + line.get('retweeted_status').get('quoted_status').get('place').get('country_code').replace('"', '""') + '"'
             except:
                 quoted_user_country_code = ''
 
@@ -522,14 +557,15 @@ for f in filenames:
                    retweeted_status_user_favourite_count,
                    retweeted_status_user_retweet_count,
                    retweeted_status_user_profile_creation_date,
-                   hastags,
                    mentions,
                    mentions_id_str,
+                   retweeted_mentions,
+                   retweeted_mentions_id_str,
+                   quoted_mentions,
+                   quoted_mentions_id_str,
                    quoted_status_created_at,
                    quoted_status_id_str,
                    quoted_status_full_text,
-                   quoted_status_count,
-                   quoted_status_reply_count,
                    quoted_status_retweet_count,
                    quoted_status_favourite_count,
                    quoted_status_user_id_str,
@@ -544,6 +580,7 @@ for f in filenames:
                    quoted_status_user_statuses_count,
                    line.get('user').get('verified'),
                    retweeted_status_user_profile_verified,
+                   quoted_status_user_profile_verified,
                    user_place_name,
                    retweeted_status_user_place_name,
                    quoted_status_user_place_name,
