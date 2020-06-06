@@ -16,18 +16,19 @@ import os
 #   Made for USC stuff, USF LATER      #
 #**************************************#
 
-#**************************************#
-# UPDATE THE FILE NAME HERE!!!         #
+#--------------------------------------#
+# UPDATE THE FILE NAME HERE!!!
 exportFileName= r'USC_march_100K_file.csv'
 
 # UPDATE NUM SAMPLE HERE!!! (Without replacement, DON'T NEED IT YET)
 #rowsToSample= 100
-#**************************************#
+#--------------------------------------#
 
-#------ read in all usc csv files
+#--------------------------------------- read in all usc data csv files ------------------------------------------#
 #Read the csvs and make a dataframe
 path = r'C:\Users\ThinkPad\PycharmProjects\jsonstuff\venv\USC_MARCH_STUFF\all_usc_csv_files' # use your path
 all_files = glob.glob(path + "/*.csv")
+#-----------------------------------------------------------------------------------------------------------------#
 
 li = []
 
@@ -37,10 +38,12 @@ for filename in all_files:
 
 df_main= pd.concat(li, axis=0, ignore_index=True)
 
-#------ read the 100k screen names
+#---------------------------------------- read the 100k screen names ---------------------------------------------#
 # Recall that we have already have 100K samples of usernames for botometer so let's import those screen_names
 path = r'C:\Users\ThinkPad\PycharmProjects\jsonstuff\venv\USC_MARCH_STUFF\rand_100k_screen_names' # use your path
 all_files = glob.glob(path + "/*.csv")
+
+#----------------------------------------------------------------------------------------------------------------#
 
 li = []
 
@@ -62,10 +65,12 @@ df_joined= df_joined[pd.notnull(df_joined['marker'])][df_main.columns]
 
 #df_joined.to_csv(exportFileName, encoding='utf-8-sig', index=False)
 
-#------ read the all processed bot files
+#----------------------------------- read the all processed bot files -------------------------------------#
 # since not every user got a bot score, we will need to attach them seperately
 path = r'C:\Users\ThinkPad\PycharmProjects\jsonstuff\venv\USC_MARCH_STUFF\all_bots_scores' # use your path
 all_files = glob.glob(path + "/*.csv")
+
+#----------------------------------------------------------------------------------------------------------#
 
 li = []
 
