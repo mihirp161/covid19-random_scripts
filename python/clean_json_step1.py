@@ -66,8 +66,8 @@ for f in filenames:
     data_json = io.open(f, mode='r', encoding='utf-8-sig') # Opens in the JSONL file
     data_python = extract_json(data_json)
 
-    out_csv_name = f[f.rfind('\\'):]
-    out_csv_name = out_csv_name.split("\\")[1]
+    out_csv_name = f[f.rfind('\\'):] #IN LINUX / not \\
+    out_csv_name = out_csv_name.split("\\")[1] #IN LINUX / not \\
     out_csv_name = out_csv_name.split(".")[0]
 
     # csv writing location
