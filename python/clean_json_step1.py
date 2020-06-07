@@ -40,10 +40,12 @@ for f in glob.glob("folder_with_all_jsonl/*.jsonl"):
                 outfile.write(json.dumps(result) + "\n")
             except ValueError:
                 print(f)
+    del results[:] #clear list
     outfile.close()
 
-result= None #nullify the results list
-jline= None #nullify the results jline just in case
+# results= None #nullify the results list
+# result= None #nullify the result
+# jline= None #nullify the results jline just in case
 #********************** Ignore for now, writes a giant json *********************#
 #Writes into json format
 # result = []
