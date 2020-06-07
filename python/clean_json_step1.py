@@ -6,6 +6,7 @@ import csv
 import io
 import glob
 import os
+import re
 
 #*************************** NOTE ************************************************#
 # LINE 54, please put month in the csv file name to prevent confusion             #
@@ -23,6 +24,27 @@ def extract_json(fileobj):
         for line in fileobj:
             yield json.loads(line)
 
+#re-rewrites all the files into jsonl format
+results = []
+for f in glob.glob("folder_with_all_jsonl/*.jsonl"):
+    with open(f, 'r', encoding='utf-8-sig') as infile:
+        for jline in infile:
+            try:
+                results.append(json.loads(jline)) # read each line of the file
+            except ValueError:
+                print(f)
+    del infile #delete to release some memory back
+    with open(f,'w', encoding= 'utf-8-sig') as outfile:
+        for result in results:
+            try:
+                outfile.write(json.dumps(result) + "\n")
+            except ValueError:
+                print(f)
+    outfile.close()
+
+result= None #nullify the results list
+jline= None #nullify the results jline just in case
+#********************** Ignore for now, writes a giant json *********************#
 #Writes into json format
 # result = []
 # for f in glob.glob("folder_with_all_jsonl/*.jsonl"):
@@ -37,8 +59,13 @@ def extract_json(fileobj):
 # with open('merged_file.json','w', encoding= 'utf-8-sig') as outfile:
 #     json.dump(result, outfile)
 
-#********************** Ignore this if only want to convert single jsonl file ***************#
-#writes into a proper jsonl file
+
+# # #write the file in BOM TO preserve the emojis and special characters
+# with open('merged_file.json','w', encoding= 'utf-8-sig') as outfile:
+#     json.dump(result, outfile, indent=None)
+
+#********************** Ignore this only if want to convert single jsonl file ***************#
+# #writes into a proper jsonl file
 # outfile = open('merged_file.jsonl','w', encoding= 'utf-8-sig')
 # for f in glob.glob("folder_with_all_jsonl/*.jsonl"):
 #     with open(f, 'r', encoding='utf-8-sig') as infile:
@@ -62,9 +89,14 @@ filenames = glob.glob("folder_with_all_jsonl/*.jsonl")
 #read file by file, write file by file. Simple.
 
 for f in filenames:
-    #path to the jsonl file/s (if you want single json file converted, edit the file name here!)
-    data_json = io.open(f, mode='r', encoding='utf-8-sig') # Opens in the JSONL file
-    data_python = extract_json(data_json)
+    try:
+        #path to the jsonl file/s (if you want single json file converted, edit the file name here!)
+        data_json = io.open(f, mode='r', encoding='utf-8-sig') # Opens in the JSONL file
+        data_python = extract_json(data_json)
+    except:
+        print(f, "{~~~~~~ is broken.")
+
+    data_python = re.sub(r'\n*\Z', '', data_python)
 
     out_csv_name = f[f.rfind('\\'):] #IN LINUX / not \\
     out_csv_name = out_csv_name.split("\\")[1] #IN LINUX / not \\
@@ -158,11 +190,24 @@ for f in filenames:
     # some of the objects do have NULL values (like retweets, mentions etc.) so they're
     # in a try-catch blocks
 
+    # for line in data_python:
+    #
+    #     if line == None or line == '':
+    #         print('I got a null or empty string value for data in a file')
+    #     else:
+    #         js = json.loads(str(data))
+
+
     for line in data_python:
 
-        #write only the english accounts to file
+        try:
+            end_check = (line.get('lang') == 'en')
+        except:
+            print(line, "{~~~~~~~~~~~~~~JSON line is broken.")
+            exit()
 
-        if(line.get('lang') == 'en'):
+        #write only the english accounts to file
+        if(end_check):
 
             # in_reply_to_status_id_str
             try:
@@ -519,32 +564,116 @@ for f in filenames:
             except:
                 quoted_user_country_code = ''
 
+            #created at
+            try:
+                created_at = '"' + line.get('created_at').replace('"', '""') + '"'
+            except:
+                created_at = ''
+
+            # id_str
+            try:
+                id_str = str(line.get('id_str'))
+            except:
+                id_str = ''
+
+            # full_text
+            try:
+                full_text = '"' + line.get('full_text').replace('"','""') + '"'
+            except:
+                full_text = ''
+
+            # retweet_count
+            try:
+                retweet_count = str(line.get('retweet_count'))
+            except:
+                retweet_count = ''
+
+            # favorite_count
+            try:
+                favorite_count = str(line.get('favorite_count'))
+            except:
+                favorite_count = ''
+
+            # user_id_str
+            try:
+                user_id_str = line.get('user').get('id_str')
+            except:
+                user_id_str = ''
+
+            # user_screen_name
+            try:
+                user_screen_name = str(line.get('user').get('screen_name'))
+            except:
+                user_screen_name = ''
+
+            #user_verified
+            try:
+                user_verified = line.get('user').get('verified')
+            except:
+                user_verified = ''
+
+            #user_followers_count
+            try:
+                user_followers_count = str(line.get('user').get('followers_count'))
+            except:
+                user_followers_count = ''
+
+            #user_friends_count
+            try:
+                user_friends_count = str(line.get('user').get('friends_count'))
+            except:
+                user_friends_count = ''
+
+            #user_listed_count
+            try:
+                user_listed_count = str(line.get('user').get('listed_count'))
+            except:
+                user_listed_count = ''
+
+            #user_statuses_count
+            try:
+                user_statuses_count = str(line.get('user').get('statuses_count'))
+            except:
+                user_statuses_count = ''
+
+            #user_favourites_count
+            try:
+                user_favourites_count = str(line.get('user').get('favourites_count'))
+            except:
+                user_favourites_count = ''
+
+            #user_created_at
+            try:
+                user_created_at = str(line.get('user').get('created_at'))
+            except:
+                user_created_at = ''
+
             #writes a row and gets the fields from the json object
             #screen_name and followers/friends are found on the second level hence two get methods
-            row = [line.get('created_at'),
-                   str(line.get('id_str')),
-                   '"' + line.get('full_text').replace('"','""') + '"', #creates double quotes
+            row = [created_at,
+                   id_str,
+                   full_text,
                    in_reply_to_status_id_str,
                    in_reply_to_user_id_str,
                    in_reply_to_screen_name,
-                   str(line.get('retweet_count')),
-                   str(line.get('favorite_count')),
+                   retweet_count,
+                   favorite_count,
                    retweeted_status_created_at,
                    retweeted_status_id_str,
                    retweeted_status_full_text,
                    retweets_status_retweet_count,
                    retweets_status_favourite_count,
-                   line.get('user').get('id_str'),
-                   str(line.get('user').get('screen_name')),
+                   user_id_str,
+                   user_screen_name,
                    user_description,
                    user_location,
                    user_coordinates,
-                   str(line.get('user').get('followers_count')),
-                   str(line.get('user').get('friends_count')),
-                   str(line.get('user').get('listed_count')),
-                   str(line.get('user').get('statuses_count')),
-                   str(line.get('user').get('favourites_count')),
-                   str(line.get('user').get('created_at')),
+                   user_followers_count,
+                   user_friends_count,
+                   user_listed_count,
+                   user_statuses_count,
+                   user_favourites_count,
+                   user_created_at,
                    retweeted_status_user_id_str,
                    retweeted_status_user_screen_name,
                    retweeted_status_user_description,
@@ -578,7 +707,7 @@ for f in filenames:
                    quoted_status_user_listed_count,
                    quoted_status_user_favourite_count,
                    quoted_status_user_statuses_count,
-                   line.get('user').get('verified'),
+                   user_verified,
                    retweeted_status_user_profile_verified,
                    quoted_status_user_profile_verified,
                    user_place_name,
@@ -593,5 +722,6 @@ for f in filenames:
             csv_out.write(row_joined)
             csv_out.write(u'\n')
 
+    del row, data_json, data_python
     #close the csv file for writing
     csv_out.close()
