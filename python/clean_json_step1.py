@@ -11,6 +11,7 @@ import re
 #*************************** NOTE ************************************************#
 # LINE 54, please put month in the csv file name to prevent confusion             #
 # LINE 41 & 50, please give the jsonl file name if single file is to be converted #
+# in this hydrator jsonl fiels, full_text are tweets, text objects are in json    #
 #*********************************************************************************#
 
 # creates a .csv file using a Twitter .json file
