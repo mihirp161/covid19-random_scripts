@@ -1,3 +1,6 @@
+# For USF SAIL
+# ~Dre, Mihir
+
 import json
 import io
 import glob
