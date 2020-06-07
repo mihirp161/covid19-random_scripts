@@ -98,8 +98,6 @@ for f in filenames:
     except:
         print(f, "{~~~~~~ is broken.")
 
-    data_python = re.sub(r'\n*\Z', '', data_python)
-
     out_csv_name = f[f.rfind('\\'):] #IN LINUX / not \\
     out_csv_name = out_csv_name.split("\\")[1] #IN LINUX / not \\
     out_csv_name = out_csv_name.split(".")[0]
