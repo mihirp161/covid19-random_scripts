@@ -16,10 +16,16 @@ import os
 #   Made for USC stuff, USF LATER      #
 #**************************************#
 
-#--------------------------------------#
-# UPDATE THE FILE NAME HERE!!!
-out_csv_name= r'USC_march_100K_file_final.csv'
+#---------Default, always turn url to title tags ------------#
+turning_url_to_title =  True
+#------------------------------------------------------------#
 
+
+#-------- UPDATE OUT FILE NAME HERE!!!--------------#
+out_csv_name= r'USC_march_100K_file_final.csv'
+#---------------------------------------------------#
+
+#make a save directory
 try:
    os.mkdir("./100K_March/") # <---- Here
 except OSError as e:
@@ -27,7 +33,6 @@ except OSError as e:
    exit()
 
 final_path = './100K_March/' # <--- Current directory
-
 
 # UPDATE NUM SAMPLE HERE!!! (Without replacement, DON'T NEED IT YET)
 #rowsToSample= 100
@@ -120,41 +125,6 @@ def get_title_from_url(url):
     except:
         return ''
 
-# iterate over rows with iterrows()
-for index, row in df_joined_bots.iterrows():
-    # access data using column names
-    # do this to prevent Null error that comes from split fn splitting Null
-    df_joined_bots['tweet_text'] = df_joined_bots['tweet_text'].fillna("")
-    df_joined_bots['retweet_text'] = df_joined_bots['retweet_text'].fillna("")
-    df_joined_bots['quoted_text'] = df_joined_bots['quoted_text'].fillna("")
-
-    #first let's take care of tweet_text
-    s = df_joined_bots.at[index, 'tweet_text']
-    l = list(map(lambda x: x, s.split()))
-    m = list(map(get_title_from_url, l))
-    n = ' '.join(m)
-    df_joined_bots.at[index, 'tweet_text']= n
-
-    del s,l,m,n
-
-    # then take care of retweets
-    s = df_joined_bots.at[index, 'retweet_text']
-    l = list(map(lambda x: x, s.split()))
-    m = list(map(get_title_from_url, l))
-    n = ' '.join(m)
-    df_joined_bots.at[index, 'retweet_text']= n
-
-    del s, l, m, n
-
-    # lastly, quoted_text
-    s = df_joined_bots.at[index, 'quoted_text']
-    l = list(map(lambda x: x, s.split()))
-    m = list(map(get_title_from_url, l))
-    n = ' '.join(m)
-    df_joined_bots.at[index, 'quoted_text'] = n
-
-    del s, l, m, n
-
 #(2) Finally write the csv file
 file_name = ''.join([out_csv_name, '_utf-8', '.csv'])
 save_path = os.path.abspath(
@@ -162,6 +132,47 @@ save_path = os.path.abspath(
         final_path, file_name
     )
 )
-df_joined_bots.to_csv(save_path, encoding='utf-8-sig', index=False)
+
+if(turning_url_to_title):
+    # iterate over rows with iterrows()
+    for index, row in df_joined_bots.iterrows():
+        # access data using column names
+        # do this to prevent Null error that comes from split fn splitting Null
+        df_joined_bots['tweet_text'] = df_joined_bots['tweet_text'].fillna("")
+        df_joined_bots['retweet_text'] = df_joined_bots['retweet_text'].fillna("")
+        df_joined_bots['quoted_text'] = df_joined_bots['quoted_text'].fillna("")
+
+        #first let's take care of tweet_text
+        s = df_joined_bots.at[index, 'tweet_text']
+        l = list(map(lambda x: x, s.split()))
+        m = list(map(get_title_from_url, l))
+        n = ' '.join(m)
+        df_joined_bots.at[index, 'tweet_text']= n
+
+        del s,l,m,n
+
+        # then take care of retweets
+        s = df_joined_bots.at[index, 'retweet_text']
+        l = list(map(lambda x: x, s.split()))
+        m = list(map(get_title_from_url, l))
+        n = ' '.join(m)
+        df_joined_bots.at[index, 'retweet_text']= n
+
+        del s, l, m, n
+
+        # lastly, quoted_text
+        s = df_joined_bots.at[index, 'quoted_text']
+        l = list(map(lambda x: x, s.split()))
+        m = list(map(get_title_from_url, l))
+        n = ' '.join(m)
+        df_joined_bots.at[index, 'quoted_text'] = n
+
+        del s, l, m, n
+
+    df_joined_bots.to_csv(save_path, encoding='utf-8-sig', index=False)
+
+else:
+    #if not wanting to convert urls to csv, go straight to write the file
+    df_joined_bots.to_csv(save_path, encoding='utf-8-sig', index=False)
 
 #EOF
