@@ -22,7 +22,7 @@ turning_url_to_title =  True
 
 
 #-------- UPDATE OUT FILE NAME HERE!!!--------------#
-out_csv_name= r'USC_march_100K_file_final.csv'
+out_csv_name= r'USC_march_100K_file_final'
 #---------------------------------------------------#
 
 #make a save directory
