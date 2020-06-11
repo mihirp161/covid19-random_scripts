@@ -16,14 +16,14 @@ import datetime
 # auth keys and other stuff here
 
 # now it's called rapidapi key (it's in your app, then security)
-rapidapi_key = "yourRapidAPIKey"
+rapidapi_key = "RAPID_API_PRO_KEY"
 
 # twitter authorization keys
 twitter_app_auth = {
-    'consumer_key': 'FromTwitterDevAcc',
-    'consumer_secret': 'FromTwitterDevAcc',
-    'access_token': 'FromTwitterDevAcc',
-    'access_token_secret': 'FromTwitterDevAcc'
+    'consumer_key': 'TWITTER_KEY',
+    'consumer_secret': 'TWITTER_KEY',
+    'access_token': 'TWITTER_KEY',
+    'access_token_secret': 'TWITTER_KEY'
 }
 
 # Pro API endpoint(HAVE TO PASS THIS!! Currently default is wrong in the package)
@@ -43,18 +43,18 @@ chunksize2 = 150 #17200 is daily, the lesser the chunk, higher the numbers of fi
 
 #*********************** UPDATE THE PATH HERE!!! *************************#
 try:
-   os.mkdir("./BOT_CSV") # <---- Here
+   os.mkdir("./BOT_CSV_USC_MAY") # <---- Here
 except OSError as e:
    print("Directory exists. Please change both folders names in this block to whatever.")
    exit()
 
-path = './BOT_CSV/' # <--- Here too
+path = './BOT_CSV_USC_MAY/' # <--- Here too
 
 #************************************************************************#
 
-data2 = pd.read_csv('output.csv',
+data2 = pd.read_csv('/work_bgfs/m/mkpatel/USC Data_portions_and Stuff/2020-05/2020-05_USC_en_portions/output_Mihir_1_may.csv',
                 chunksize=chunksize2,
-                encoding = "ISO-8859-1", usecols=['screenNames'])
+                encoding = "ISO-8859-1", usecols=['user_screen_name'])
 df2 = data2.get_chunk(chunksize2)
 headers = list(df2.keys())
 del data2
@@ -64,10 +64,10 @@ start_chunk = 0
 inner_itr_count = 0
 incremented_date = datetime.datetime.now().date()+datetime.timedelta(days=1)
 
-data2 = pd.read_csv('output.csv',
+data2 = pd.read_csv('/work_bgfs/m/mkpatel/USC Data_portions_and Stuff/2020-05/2020-05_USC_en_portions/output_Mihir.csv',
                 chunksize=chunksize2,
                 encoding = "ISO-8859-1",
-                skiprows=chunksize2*start_chunk, usecols=['screenNames'])
+                skiprows=chunksize2*start_chunk, usecols=['user_screen_name'])
 
 for i, df2 in enumerate(data2):
     try:
@@ -92,11 +92,11 @@ for i, df2 in enumerate(data2):
             #for ind in range(0, rapidapi_pro_daily_free):  # otherwise keep this line so we don't get surcharge
 
                 inner_itr_count  = inner_itr_count+1 #incerement how much things get processed
-                username_part = current_df['screenNames'][ind]
-                #print("inner_itr_count is: ", inner_itr_count)
+                username_part = current_df['user_screen_name'][ind]
+                print("inner_itr_count is: ", inner_itr_count)
                 # try-catch the handle all the botometer errors, can be cleaned with R so NA and not NaN
                 try:
-                    botometer_result_part = bom.check_account(current_df['screenNames'][ind])
+                    botometer_result_part = bom.check_account(current_df['user_screen_name'][ind])
                 except:
                     botometer_result_part = {'cap': {'english': 0, 'universal': 0},
                                              'categories': {'content': 0, 'friend': 0,
