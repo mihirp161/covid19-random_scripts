@@ -5,7 +5,7 @@ options(warn = -1)
 library(readr)
 
 #input csv name (Needs to be updated everytime)
-usv_in_file_name <-"C:/Users/ThinkPad/PycharmProjects/jsonstuff/venv/100K_March_NO_URL_ORIGINAL/USC_march_100K_file_final_utf8.csv"
+usv_in_file_name <-"USC_march_100K_file_final_utf8.csv"
 
 #output csv name (Needs to be updated everytime)
 ucsv_out_file_name <- "filtered_USC_march_100K_file-utf8.csv"
@@ -93,7 +93,10 @@ select_columns_here <- c(
 #read with readr, it's defaul encoding is bit better to handle & error prone
 give_user_this <- readr::read_csv(file = usv_in_file_name) #we could have used this, but it's better to store here
 
+give_user_this <- give_user_this[, select_columns_here]
+
 #write with a columns person required
 readr::write_excel_csv(give_user_this, ucsv_out_file_name)
 
-
+#check
+#a<- readr::read_csv(file = ucsv_out_file_name)
