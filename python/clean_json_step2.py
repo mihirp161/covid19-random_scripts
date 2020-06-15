@@ -11,13 +11,15 @@ import string
 import glob
 import sys
 import os
+import signal
+from requests.exceptions import Timeout
 
 #****************** NOTE **************#
 #   Made for USC stuff, USF LATER      #
 #**************************************#
 
 #---------Default, always turn url to title tags ------------#
-turning_url_to_title =  True
+turning_url_to_title =  False
 #------------------------------------------------------------#
 
 
@@ -30,7 +32,7 @@ try:
    os.mkdir("./100K_March/") # <---- Here
 except OSError as e:
    print("Directory exists. Please change both folders names in this block to whatever.")
-   exit()
+   #exit()
 
 final_path = './100K_March/' # <--- Current directory
 
@@ -40,7 +42,7 @@ final_path = './100K_March/' # <--- Current directory
 
 #----------------------------------- read the all processed bot files -------------------------------------#
 # since not every user got a bot score, we will need to attach them seperately
-path = r'C:\Users\ThinkPad\PycharmProjects\jsonstuff\venv\USC_MARCH_STUFF\all_bots_scores' # use your path
+path = r'C:/Users/ThinkPad/SpyderProjects/JsonStuff/USC_MARCH_STUFF_OLD/all_bots_scores' # use your path
 all_files = glob.glob(path + "/*.csv")
 
 #----------------------------------------------------------------------------------------------------------#
@@ -48,14 +50,14 @@ all_files = glob.glob(path + "/*.csv")
 li = []
 
 for filename in all_files:
-    df = pd.read_csv(filename, index_col=None, header=0, encoding= 'utf-8-sig')
+    df = pd.read_csv(filename, index_col=None, header=0, encoding= 'utf-8-sig',low_memory=False)
     li.append(df)
 
 df_botscores = pd.concat(li, axis=0, ignore_index=True)
 
 #---------------------------------------- read the 100k screen names ---------------------------------------------#
 # Recall that we have already have 100K samples of usernames for botometer so let's import those screen_names
-path = r'C:\Users\ThinkPad\PycharmProjects\jsonstuff\venv\USC_MARCH_STUFF\rand_100k_screen_names' # use your path
+path = r'C:/Users/ThinkPad/SpyderProjects/JsonStuff/USC_MARCH_STUFF_OLD/rand_100k_screen_names' # use your path
 all_files = glob.glob(path + "/*.csv")
 
 #----------------------------------------------------------------------------------------------------------------#
@@ -63,7 +65,7 @@ all_files = glob.glob(path + "/*.csv")
 del li[:]
 
 for filename in all_files:
-    df = pd.read_csv(filename, index_col=None, header=0, encoding= 'utf-8-sig')
+    df = pd.read_csv(filename, index_col=None, header=0, encoding= 'utf-8-sig',low_memory=False)
     li.append(df)
 
 df_100k = pd.concat(li, axis=0, ignore_index=True)
@@ -76,14 +78,14 @@ df_100k['marker'] = 1
 
 #--------------------------------------- read in all usc data csv files ------------------------------------------#
 #Read the csvs and make a dataframe
-path = r'C:\Users\ThinkPad\PycharmProjects\jsonstuff\venv\USC_MARCH_STUFF\JSONL_TO_CSV_USC_MARCH' # use your path
+path = r'C:/Users/ThinkPad/SpyderProjects/JsonStuff/USC_MARCH_STUFF_OLD/JSONL_TO_CSV_USC_MARCH' # use your path
 all_files = glob.glob(path + "/*.csv")
 #-----------------------------------------------------------------------------------------------------------------#
 
 del li[:]
 
 for filename in all_files:
-    df = pd.read_csv(filename, index_col=None, header=0, encoding= 'utf-8-sig')
+    df = pd.read_csv(filename, index_col=None, header=0, encoding= 'utf-8-sig',low_memory=False)
     li.append(df)
 
 df_main= pd.concat(li, axis=0, ignore_index=True)
@@ -93,11 +95,11 @@ df_main= pd.concat(li, axis=0, ignore_index=True)
 # join the two, keeping all of df1's indices
 df_joined = pd.merge(df_main, df_100k, on=['user_screen_name'], how='left')
 
+
 # extract desired columns where marker is NaN
 df_joined= df_joined[pd.notnull(df_joined['marker'])][df_main.columns]
 
 #df_joined.to_csv(exportFileName, encoding='utf-8-sig', index=False)
-
 
 #------ now merge the file again
 df_joined_bots = pd.merge(df_joined,df_botscores, on = ['user_screen_name'],how='left')
@@ -109,16 +111,21 @@ df_joined_bots = pd.merge(df_joined,df_botscores, on = ['user_screen_name'],how=
 #NOTE: For twitter urls, this will not work, because they don't have "title" even if it
 #       exists in the console when looking at a browser
 
+# function that eventually gets the title tags from url
 def get_title_from_url(url):
     try:
         #check if it's a word of https string
-        if(url.startswith('http')):
-            #check if url is valid
-            page = requests.get(url)
+        if(url.startswith('http')):           
+            #check if url is valid or returns an html, otherwise cut the time
+            try:
+                page = requests.get(url, timeout=5)
+            except Timeout:
+                # return dead url
+                return ''
             #if the url is valid, sometimes phisy/ssl-missing site throw error
             html = BeautifulSoup(page.content, 'html.parser')
             #finally get the title if everyting is good
-            page_title = html.find('title').text.strip()
+            page_title = html.find('title').text.strip()           
             return page_title
         else:
             return url
