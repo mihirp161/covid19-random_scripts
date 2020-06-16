@@ -57,7 +57,7 @@ outputcsv_file <- readr::read_csv("output.csv") #in linux, just to read.csv("out
 colnames(botcsv_data) <- "screenNames"
 #now compare the two frame and remove the rows which are in 
 
-outputcsv_file <- dplyr::anti_join(outputcsv_file,botcsv_data)
+outputcsv_file <- dplyr::anti_join(outputcsv_file,botcsv_data, by= "screenNames")
 
 #write the file back
 readr::write_csv(outputcsv_file, "output.csv") #in linux, do write.csv("output.csv")
