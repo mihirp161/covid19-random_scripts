@@ -159,26 +159,26 @@ for f in filenames:
     # some of the objects do have NULL values (like retweets, mentions etc.) so they're
     # in a try-catch blocks
 
-    for line in data_python:
+     for line in data_python:
 
         try:
-            check = line.get('lang') == 'en'
+            end_check = (line.get('lang') == 'en')
         except:
-            check = ''
+            print(line, "{~~~~~~~~~~~~~~JSON line is broken.")
+            exit()
 
         #write only the english accounts to file
-
-        if(check):
+        if(end_check):
 
             # in_reply_to_status_id_str
             try:
-                in_reply_to_status_id_str = '"' + line.get('in_reply_to_status_id_str').replace('"','""') + '"'
+                in_reply_to_status_id_str = line.get('in_reply_to_status_id_str')
             except:
                 in_reply_to_status_id_str = ''
 
             # in_reply_to_user_id_str
             try:
-                in_reply_to_user_id_str = '"' + line.get('in_reply_to_user_id_str').replace('"','""') + '"'
+                in_reply_to_user_id_str = line.get('in_reply_to_user_id_str')
             except:
                 in_reply_to_user_id_str = ''
 
@@ -210,25 +210,25 @@ for f in filenames:
 
             # retweet retweet_count
             try:
-                retweets_status_retweet_count = str(line.get('retweeted_status').get('retweet_count'))
+                retweets_status_retweet_count =line.get('retweeted_status').get('retweet_count')
             except:
                 retweets_status_retweet_count = ''
 
             # retweet favourite_count
             try:
-                retweets_status_favourite_count = str(line.get('retweeted_status').get('favorite_count'))
+                retweets_status_favourite_count = line.get('retweeted_status').get('favorite_count')
             except:
                 retweets_status_favourite_count = ''
 
             # retweet created_at
             try:
-                retweeted_status_created_at = '"' + line.get('retweeted_status').get('created_at').replace('"', '""') + '"'
+                retweeted_status_created_at = line.get('retweeted_status').get('created_at')
             except:
                 retweeted_status_created_at = ''
 
             # retweet id_str
             try:
-                retweeted_status_id_str = '"' + line.get('retweeted_status').get('id_str').replace('"', '""') + '"'
+                retweeted_status_id_str = line.get('retweeted_status').get('id_str')
             except:
                 retweeted_status_id_str = ''
 
@@ -240,7 +240,7 @@ for f in filenames:
 
             # retweet user_id_str
             try:
-                retweeted_status_user_id_str = '"' + line.get('retweeted_status').get('user').get('id_str').replace('"', '""') + '"'
+                retweeted_status_user_id_str = line.get('retweeted_status').get('user').get('id_str')
             except:
                 retweeted_status_user_id_str = ''
 
@@ -272,43 +272,43 @@ for f in filenames:
 
             # retweet user_followers_count
             try:
-                retweeted_status_user_follower_count = str(line.get('retweeted_status').get('user').get('followers_count'))
+                retweeted_status_user_follower_count = line.get('retweeted_status').get('user').get('followers_count')
             except:
                 retweeted_status_user_follower_count = ''
 
             # retweet user_friends_count
             try:
-                retweeted_status_user_friends_count = str(line.get('retweeted_status').get('user').get('friends_count'))
+                retweeted_status_user_friends_count = line.get('retweeted_status').get('user').get('friends_count')
             except:
                 retweeted_status_user_friends_count = ''
 
             # retweet user_listed_count
             try:
-                retweeted_status_user_listed_count = str(line.get('retweeted_status').get('user').get('listed_count'))
+                retweeted_status_user_listed_count = line.get('retweeted_status').get('user').get('listed_count')
             except:
                 retweeted_status_user_listed_count = ''
 
             # retweet user_statuses_count
             try:
-                retweeted_status_user_statuses_count = str(line.get('retweeted_status').get('user').get('statuses_count'))
+                retweeted_status_user_statuses_count = line.get('retweeted_status').get('user').get('statuses_count')
             except:
                 retweeted_status_user_statuses_count = ''
 
             # retweet user_favourite_count
             try:
-                retweeted_status_user_favourite_count = str(line.get('retweeted_status').get('user').get('favourites_count'))
+                retweeted_status_user_favourite_count = line.get('retweeted_status').get('user').get('favourites_count')
             except:
                 retweeted_status_user_favourite_count = ''
 
             # retweet user_retweet_count
             try:
-                retweeted_status_user_retweet_count = str(line.get('retweeted_status').get('retweet_count'))
+                retweeted_status_user_retweet_count = line.get('retweeted_status').get('retweet_count')
             except:
                 retweeted_status_user_retweet_count = ''
 
             # retweet user_profile_creation_date
             try:
-                retweeted_status_user_profile_creation_date = '"' + line.get('retweeted_status').get('user').get('created_at').replace('"', '""') + '"'
+                retweeted_status_user_profile_creation_date = line.get('retweeted_status').get('user').get('created_at')
             except:
                 retweeted_status_user_profile_creation_date = ''
 
@@ -399,13 +399,13 @@ for f in filenames:
 
             # quoted created_at
             try:
-                quoted_status_created_at = '"' + line.get('retweeted_status').get('quoted_status').get('created_at').replace('"', '""') + '"'
+                quoted_status_created_at = line.get('retweeted_status').get('quoted_status').get('created_at')
             except:
                 quoted_status_created_at = ''
 
             # quoted id_str
             try:
-                quoted_status_id_str =  str(line.get('retweeted_status').get('quoted_status').get('id_str'))
+                quoted_status_id_str =  line.get('retweeted_status').get('quoted_status').get('id_str')
             except:
                 quoted_status_id_str = ''
 
@@ -417,19 +417,19 @@ for f in filenames:
 
             # quoted retweet_count
             try:
-                quoted_status_retweet_count= str(line.get('retweeted_status').get('quoted_status').get('retweet_count'))
+                quoted_status_retweet_count= line.get('retweeted_status').get('quoted_status').get('retweet_count')
             except:
                 quoted_status_retweet_count = ''
 
             # quoted favourite_count
             try:
-                quoted_status_favourite_count=  str(line.get('retweeted_status').get('quoted_status').get('favorite_count'))
+                quoted_status_favourite_count=  line.get('retweeted_status').get('quoted_status').get('favorite_count')
             except:
                 quoted_status_favourite_count= ''
 
             # quoted user_id_str
             try:
-                quoted_status_user_id_str = '"' + line.get('retweeted_status').get('quoted_status').get('user').get('id_str').replace('"', '""') + '"'
+                quoted_status_user_id_str = line.get('retweeted_status').get('quoted_status').get('user').get('id_str')
             except:
                 quoted_status_user_id_str = ''
 
@@ -461,31 +461,31 @@ for f in filenames:
 
             # quoted user_followers_count
             try:
-                quoted_status_user_follower_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('followers_count'))
+                quoted_status_user_follower_count = line.get('retweeted_status').get('quoted_status').get('user').get('followers_count')
             except:
                 quoted_status_user_follower_count = ''
 
             # quoted user_friends_count
             try:
-                quoted_status_user_friends_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('friends_count'))
+                quoted_status_user_friends_count = line.get('retweeted_status').get('quoted_status').get('user').get('friends_count')
             except:
                 quoted_status_user_friends_count = ''
 
             # quoted user_listed_count
             try:
-                quoted_status_user_listed_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('listed_count'))
+                quoted_status_user_listed_count = line.get('retweeted_status').get('quoted_status').get('user').get('listed_count')
             except:
                 quoted_status_user_listed_count = ''
 
             # quoted user_statuses_count
             try:
-                quoted_status_user_statuses_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('statuses_count'))
+                quoted_status_user_statuses_count = line.get('retweeted_status').get('quoted_status').get('user').get('statuses_count')
             except:
                 quoted_status_user_statuses_count = ''
 
             # quoted user_favourite_count
             try:
-                quoted_status_user_favourite_count = str(line.get('retweeted_status').get('quoted_status').get('user').get('favourites_count'))
+                quoted_status_user_favourite_count = line.get('retweeted_status').get('quoted_status').get('user').get('favourites_count')
             except:
                 quoted_status_user_favourite_count = ''
 
@@ -525,90 +525,92 @@ for f in filenames:
             except:
                 quoted_user_country_code = ''
 
-                # created at
-                try:
-                    created_at = '"' + line.get('created_at').replace('"', '""') + '"'
-                except:
-                    created_at = ''
+            #created at
+            try:
+                created_at = line.get('created_at')
+            except:
+                created_at = ''
 
-                # id_str
-                try:
-                    id_str = str(line.get('id_str'))
-                except:
-                    id_str = ''
+            # id_str
+            try:
+                id_str = line.get('id_str')
+            except:
+                id_str = ''
 
-                # full_text
-                try:
-                    full_text = '"' + line.get('text').replace('"', '""') + '"'
-                except:
-                    full_text = ''
+            # full_text
+            try:
+                full_text = '"' + line.get('text').replace('"','""') + '"'
+            except:
+                full_text = ''
 
-                # retweet_count
-                try:
-                    retweet_count = str(line.get('retweet_count'))
-                except:
-                    retweet_count = ''
+            # retweet_count
+            try:
+                retweet_count = line.get('retweet_count')
+            except:
+                retweet_count = ''
 
-                # favorite_count
-                try:
-                    favorite_count = str(line.get('favorite_count'))
-                except:
-                    favorite_count = ''
+            # favorite_count
+            try:
+                favorite_count = line.get('favorite_count')
+            except:
+                favorite_count = ''
 
-                # user_id_str
-                try:
-                    user_id_str = line.get('user').get('id_str')
-                except:
-                    user_id_str = ''
+            # user_id_str
+            try:
+                user_id_str = line.get('user').get('id_str')
+            except:
+                user_id_str = ''
 
-                # user_screen_name
-                try:
-                    user_screen_name = str(line.get('user').get('screen_name'))
-                except:
-                    user_screen_name = ''
+            # user_screen_name
+            try:
+                user_screen_name = '"' + line.get('user').get('screen_name').replace('"','""') + '"'
+            except:
+                user_screen_name = ''
 
-                # user_verified
-                try:
-                    user_verified = line.get('user').get('verified')
-                except:
-                    user_verified = ''
+            #user_verified
+            try:
+                user_verified = line.get('user').get('verified')
+            except:
+                user_verified = ''
 
-                # user_followers_count
-                try:
-                    user_followers_count = str(line.get('user').get('followers_count'))
-                except:
-                    user_followers_count = ''
+            #user_followers_count
+            try:
+                user_followers_count = line.get('user').get('followers_count')
+            except:
+                user_followers_count = ''
 
-                # user_friends_count
-                try:
-                    user_friends_count = str(line.get('user').get('friends_count'))
-                except:
-                    user_friends_count = ''
+            #user_friends_count
+            try:
+                user_friends_count = line.get('user').get('friends_count')
+            except:
+                user_friends_count = ''
 
-                # user_listed_count
-                try:
-                    user_listed_count = str(line.get('user').get('listed_count'))
-                except:
-                    user_listed_count = ''
+            #user_listed_count
+            try:
+                user_listed_count = line.get('user').get('listed_count')
+            except:
+                user_listed_count = ''
 
-                # user_statuses_count
-                try:
-                    user_statuses_count = str(line.get('user').get('statuses_count'))
-                except:
-                    user_statuses_count = ''
+            #user_statuses_count
+            try:
+                user_statuses_count = line.get('user').get('statuses_count')
+            except:
+                user_statuses_count = ''
 
-                # user_favourites_count
-                try:
-                    user_favourites_count = str(line.get('user').get('favourites_count'))
-                except:
-                    user_favourites_count = ''
+            #user_favourites_count
+            try:
+                user_favourites_count = line.get('user').get('favourites_count')
+            except:
+                user_favourites_count = ''
 
-                # user_created_at
-                try:
-                    user_created_at = str(line.get('user').get('created_at'))
-                except:
-                    user_created_at = ''
+            #user_created_at
+            try:
+                user_created_at = line.get('user').get('created_at')
+            except:
+                user_created_at = ''
 
+            #writes a row and gets the fields from the json object
+            #screen_name and followers/friends are found on the second level hence two get methods
             #writes a row and gets the fields from the json object
             #screen_name and followers/friends are found on the second level hence two get methods
             row = [created_at,
