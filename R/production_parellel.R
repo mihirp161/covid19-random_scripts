@@ -13,26 +13,27 @@ library("tidyselect")
 #install.packages("ndjson", repos='http://cran.us.r-project.org')
 library("ndjson")#, lib.loc="/tmp/RtmpDG5v7Q/downloaded_packages")
 #install.packages("doParallel")
-#library("doParallel")
+library("doParallel")
+#install.packages("data.table")
 library("data.table")
 # creates a list of all json files in dir as a full string
 
 
 #--------------------------------------------- Parllel logic----------------------------------------------------#
-fileNames <- fileNames_all
+#fileNames <- fileNames_all
 
 # cl <- makePSOCKcluster(5)
 # registerDoParallel(cl)
 
 
 #------------------------------------------- File paths and destination paths ---------------------------------#
-fileNames_all <- "C:\\Users\\ThinkPad\\SpyderProjects\\JsonStuff\\folder_with_all_jsonl\\output-2020-01-22.jsonl"
+fileNames_all <- "SOME.jsonl"
 # creates a list of all json files in dir as a shortname
 #fileNamesShort <- list.files("/shares_bgfs/si_twitter/covid19/USC_March_jsonls_Need_Conversions/", "*_part1.jsonl$", full.names = FALSE)
 # creates likst off all csv files in completed dir
 #finishedFiles <- list.files("/shares_bgfs/si_twitter/covid19/processedCSVs/", "*.csv", full.names = FALSE)
 # establishes output file location
-parsedFolder <- "C:\\Users\\ThinkPad\\SpyderProjects\\JsonStuff\\Attempt to fix\\"
+parsedFolder <- "SOME PATH TO A FOLDER"
 
 #-------------------------------- Read in the json/l files ---------------------------------------------------#
 #read the json here and make whatever
@@ -268,13 +269,13 @@ parsedTweets <- dplyr::bind_rows(distinct_dat,multiples_dat)
 # creates filename from existing string. 
 
 # Then writes csv with excel format to preserve special chars
-readr::write_excel_csv(parsedTweets, path=paste0(parsedFolder,str_sub(fileNames_all,67,89),".csv"))
+#readr::write_excel_csv(parsedTweets, path=paste0(parsedFolder,str_sub(fileNames_all,67,89),".csv"))
 
 # outputs last processed file
-print(paste0("Finished with ",str_sub(fileNames_all,67,89)))
+#print(paste0("Finished with ",str_sub(fileNames_all,67,89)))
 
 # loop to save memory
 #remove(parsedTweets)
 
-stopCluster(cl)
+#stopCluster(cl)
 
