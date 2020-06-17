@@ -77,7 +77,7 @@ false_bill_gates_keywords= ['bill gates', 'melina gates', 'vatican',
 # false_bill_gates_df= frame.loc[np.random.choice(frame.index, size= rowsToSample)]
 
 #*************************** read the 100k csv here ******************************************#
-main_df = pd.read_csv("./good 100k file/filtered_USC_march_100K_file-utf8.csv",
+main_df = pd.read_csv("./SOME CSV",
                       low_memory=False, encoding= 'utf-8-sig', nrows=100000)
 
 #filter based on bot score
@@ -162,7 +162,7 @@ def write_me_a_file(exportFileName, filtered_df_at_level):
     filtered_df_at_level.to_csv(exportFileName, encoding='utf-8-sig', index=False)
 
 
-write_me_a_file('5g_queried_utf-8_low_bots.csv', filter_df_level_1)
+write_me_a_file('SOME.csv', filter_df_level_1)
 
 #clear the list
 #del index_list[:]
