@@ -49,7 +49,7 @@ for(i in seq_along(fileNames_all)) {
   #         map_df(~fromJSON(file.path(path, .), flatten = TRUE))
   # Remove all the NA's in the dataframe
   #parsedTweets <- gsub("NA", "", parsedTweets)
-  parsedTweets[parsedTweets == "NA"]  <- ""
+  #parsedTweets[is.na(parsedTweets)]  <- ""
   #na.omit(parsedTweets)
   
   ##------------------------------ Combine all the multiple columns into one, by '|'---------------------------#
@@ -207,6 +207,7 @@ for(i in seq_along(fileNames_all)) {
                      "retweeted_status.quoted_status.user.listed_count",
                      "retweeted_status.quoted_status.user.favourites_count",
                      "retweeted_status.quoted_status.user.statuses_count",
+                     "retweeted_status.quoted_status.user.created_at",
                      "place.full_name",
                      "retweeted_status.place.full_name",
                      "retweeted_status.quoted_status.place.full_name",
@@ -219,13 +220,15 @@ for(i in seq_along(fileNames_all)) {
                      ##"retweeted_status.entities.urls.url", # retweet Original Link| retweetLink
                      ##"#retweeted_status.extended_entities.media.media_url_https", # retweet media| retweetOriginalMedia)
   
-  
   # make a distinct column df
   
   distinct_dat <- parsedTweets %>% dplyr::select(dplyr::all_of(distinct_cols))
   
-  parsedTweets <- dplyr::bind_rows(distinct_dat, multiples_dat)
+  parsedTweets <- dplyr::bind_cols(distinct_dat, multiples_dat)
   
+  #remove NA things again
+  #parsedTweets[parsedTweets == "NA"]  <- ""
+  parsedTweets[is.na(parsedTweets)]  <- ""
   #----------------------------------------------------------------------------------------------------------
   
   # names <- c("userHandle", "userID", 
@@ -245,13 +248,14 @@ for(i in seq_along(fileNames_all)) {
   # Then writes csv with excel format to preserve special chars
   readr::write_excel_csv(parsedTweets, path=paste0(parsedFolder,sub('\\..*$','',fileNames_all[i]),".csv"))
   
-  remove(parsedTweets) 
+  #remove the df not in use
+  remove(parsedTweets, distinct_dat, multiples_dat) 
   # outputs last processed file
-  print(paste0("Finished with: ",sub('\\..*$','', i)))
+  print(paste0("Finished with: ",sub('\\..*$','', fileNames_all[i])))
 }
 
 # loop to save memory
 #remove(parsedTweets)
 
 #stopCluster(cl)
-
+#setwd("..")
