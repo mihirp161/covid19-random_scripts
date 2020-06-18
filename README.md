@@ -28,3 +28,4 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **re_make_jsonl** - only works on jsonlines files. Remove all extra EOF from the files, and formats so every line has '\n' delimiter. 
 	* **500_rows_maker** - filters a dataframe based on queries.
 	* **replace_url_stripped** - A stripped down version of clean_json_step2.py, that only removes only removes the URL with <title> tag.
+	* **clean_standardize**- Formats jsonLines into proper json trees.
