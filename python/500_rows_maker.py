@@ -1,5 +1,6 @@
 # For USF SAIL
 # ~Mihir
+
 import csv
 import pandas as pd
 import numpy as np
@@ -10,7 +11,6 @@ import sys
 import os
 import time
 
-
 #------------- query (consider seperating it)
 
 #*******************************************************************************#
@@ -18,6 +18,13 @@ import time
 #*******************************************************************************#
 
 #Query list for 8 topics
+
+just_mask= ['mask', 'face mask', 'n95', 'cloth', 'fabrik', 'fabrick', 'fabric',
+            'medical mask', 'medical-mask', 'face-mask', 'musk', 'face coverings',
+            'face-covering', 'face covering', 'cloth-covering','face-cover', 'face cover',
+            'bandana', 't-shirt face mask', ' t-shirt mask', 't shirt mask', 'tshirt mask',
+            'tshirt-mask', 'reusable face mask', 'surgical-mask', 'surgical mask', 'n90', 'respirator mask',
+            'respiratory-mask','respirator-mask','gas mask', 'n99', 'ffp1', 'ffp2', 'ffp3', '3m', 'respiratory mask']
 
 #malria treatments
 false_treatment_keywords= ['rx', 'malaria rx', 'hydroxy',
@@ -33,7 +40,7 @@ false_bleach_y_alcohol_keywords= ['bleach', 'lysol', 'peroxide',
                                  'chlorine', 'inject', 'ingest',
                                  'lyzol', 'lizol', 'injest',
                                  'ingect', 'bleech', 'oxide',
-                                 'perooxide', 'chlorene']
+                                 'perooxide', 'chlorene', 'chloroxide']
 
 #UV lights
 false_uv_lamps_keywords= ['uv', 'ultraviolet', 'tanning', 'tanning bed',
@@ -77,18 +84,21 @@ false_bill_gates_keywords= ['bill gates', 'melina gates', 'vatican',
 # false_bill_gates_df= frame.loc[np.random.choice(frame.index, size= rowsToSample)]
 
 #*************************** read the 100k csv here ******************************************#
-main_df = pd.read_csv("./SOME CSV",
-                      low_memory=False, encoding= 'utf-8-sig', nrows=100000)
+main_df = pd.read_csv("./good 100k file/filtered_USC_march_100K_file-utf8.csv",
+                      low_memory=False, encoding= 'utf-8-sig')
 
 #filter based on bot score
 # everything between (0.0-0.4)
 level_1_bot_filter_df = main_df.loc[(main_df.cap_english>=0.0) & (main_df.cap_english<0.4)]
+print("level_1_bot_filter_df", level_1_bot_filter_df.shape)
 
 # everything between (0.4-0.8)
 level_2_bot_filter_df = main_df.loc[(main_df.cap_english>=0.4) & (main_df.cap_english<0.8)]
+print("level_1_bot_filter_df", level_2_bot_filter_df.shape)
 
 # everything between (0.8-1.0)
 level_3_bot_filter_df = main_df.loc[(main_df.cap_english>=0.8) & (main_df.cap_english<1.0)]
+print("level_1_bot_filter_df", level_3_bot_filter_df.shape)
 
 ##---
 #false_rand_rows = frame.loc[np.random.choice(frame.index, size= rowsToSample)]
@@ -152,9 +162,9 @@ def give_me_queried_indices(filtering_with_these_queries, which_level_df):
 #exportFileName = '5g_queried_utf-8_low_bots.csv'
 
 #now simply filter
-filter_df_level_1  = level_1_bot_filter_df.loc[give_me_queried_indices(false_5g_tech_keywords,level_1_bot_filter_df)]
-filter_df_level_2  = level_2_bot_filter_df.loc[give_me_queried_indices(false_5g_tech_keywords,level_2_bot_filter_df)]
-filter_df_level_3  = level_3_bot_filter_df.loc[give_me_queried_indices(false_5g_tech_keywords,level_3_bot_filter_df)]
+filter_df_level_1  = level_1_bot_filter_df.loc[give_me_queried_indices(just_mask,level_1_bot_filter_df)]
+filter_df_level_2  = level_2_bot_filter_df.loc[give_me_queried_indices(just_mask,level_2_bot_filter_df)]
+filter_df_level_3  = level_3_bot_filter_df.loc[give_me_queried_indices(just_mask,level_3_bot_filter_df)]
 
 #filter_df_level_1.to_csv(exportFileName, encoding='utf-8-sig', index=False)
 
@@ -162,7 +172,9 @@ def write_me_a_file(exportFileName, filtered_df_at_level):
     filtered_df_at_level.to_csv(exportFileName, encoding='utf-8-sig', index=False)
 
 
-write_me_a_file('SOME.csv', filter_df_level_1)
+write_me_a_file('mask_queried_utf-8_low_bots.csv', filter_df_level_1)
+write_me_a_file('mask_queried_utf-8_med_bots.csv', filter_df_level_2)
+write_me_a_file('mask_queried_utf-8_hig_bots.csv', filter_df_level_3)
 
 #clear the list
 #del index_list[:]
