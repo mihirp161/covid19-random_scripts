@@ -14,6 +14,10 @@ get_title_tag <- function(url) {
   
   path_to_title <- "/html/head/title"
   
+  #sleep for a while
+  Sys.sleep(sample(5:8, 1, replace = T))
+  
+  #if word is not starting with http, return as it is
   if (!startsWith(url, "http")) {
     return("")
   }
@@ -23,17 +27,17 @@ get_title_tag <- function(url) {
     xml2::read_html(url),
     error=function(e) e
   )
-
+  #errors are caught while reading meaning page is bad or not accessible, return the url
   if(inherits(possibleError, "error")){
     return("")
   }
   else{
-    page <- xml2::read_html(url)
+    page <- xml2::read_html(url) #read it if good
   }
-  
+  #check if title texts exist
   if(identical(page %>%
-                    rvest::html_nodes(xpath = path_to_title) %>%
-                    unique(), character(0))){
+               rvest::html_nodes(xpath = path_to_title) %>%
+               unique(), character(0))){
     return("")
   }
   else if(identical(page %>%
@@ -42,16 +46,16 @@ get_title_tag <- function(url) {
                     unique(), character(0))){
     return("")
   }
-  else{
+  else{ #otherwise remove the title tags, and return that
     page <- xml2::read_html(url)
-
+    
     conf_nodes <- rvest::html_nodes(page, xpath = path_to_title)
-
+    
     title <- rvest::html_text(conf_nodes)
-
+    
     return(title)
   }
-
+  
 }
 
 raw_output <- read.csv("output-2020-01-21.csv", stringsAsFactors = FALSE)
@@ -60,13 +64,13 @@ raw_output$text <- gsub("[\n]", "", raw_output$text)
 
 #main function that replaces URL
 replace_url_tweet <- function(any_text_column){
-  
+
   #vector that holds each row
   then_this <- c()
 
   for(x in seq_along(any_text_column)){
     a <- strsplit(any_text_column[x],split=" ") #list of words
-      
+
     v <- c() #stores the return from helper function
     for(i in a){
       for(j in i){
@@ -82,13 +86,13 @@ replace_url_tweet <- function(any_text_column){
     #make a dataframe
     df <- data.frame(v= v, k = k, stringsAsFactors = FALSE)
     #merge
-    replace_with_this <- df %>% 
-                          dplyr::mutate(v = ifelse(is.na(v), k, v)) %>% 
-                          dplyr::select(v)
+    replace_with_this <- df %>%
+      dplyr::mutate(v = ifelse(is.na(v), k, v)) %>%
+      dplyr::select(v)
     #append
     then_this <- c(then_this,paste((replace_with_this[,1]),collapse=" "))
   }
-  
+
   return(then_this)
 }
 
