@@ -13,6 +13,9 @@ import sys
 import os
 import signal
 from requests.exceptions import Timeout
+from random import randint
+from time import sleep
+
 
 #give the in-file name (with full path)
 in_file_name= "C:/Users/ThinkPad/SpyderProjects/JsonStuff/JSONL_TO_CSV_USC_MARCH/sfds_utf-8.csv"
@@ -41,6 +44,7 @@ df_joined_bots = pd.read_csv(in_file_name, index_col=None, header=0, encoding= '
 
 # function that eventually gets the title tags from url
 def get_title_from_url(url):
+    sleep(randint(5,8))
     try:
         #check if it's a word of https string
         if(url.startswith('http')):           
