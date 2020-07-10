@@ -19,6 +19,7 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **Rclean_json_step2**- R script to replace *clean_json_step2.py*, because in some linux machine, Pandas is behaving strangely like shifting columns. If you're on windows, you can use this or *clean_json_step2.py.*
 	* **production_parellel**- R script to replace *clean_json_step1.py*, when the SLURM is being weird to us.
 	* **TPMOD_csv_makers**- upgraded version of *specific_column_csv_writer.R* written for topic-modeling people.
+	* **senti_stren_viz**- extension of sentistren.py. It's purpose is to create graph and do further analysis.
 * python (./python)
 	* **populate_bot_files** - Script for collecting Botometer scores from an output.csv *(this file contains 1 col usernames)*       
 	* **username_cutter** - Reads all the csv files based on a column and returns a big csv. If you want to split that csv
