@@ -2,7 +2,8 @@
 
 This repository contains random scripts. You can pick them up as you find them useful. For question, refer to the individual listed on the top.            
 
-**Note:**
+### Note
+
 *Everything here is a work-in-progress. Please connect to member/s listed above your script to get further help!*
 
 ## Contents
