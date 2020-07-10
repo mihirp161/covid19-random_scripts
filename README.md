@@ -31,3 +31,4 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **replace_url_stripped** - A stripped down version of clean_json_step2.py, that only removes only removes the URL with <title> tag.
 	* **clean_standardize**- Formats jsonLines into proper json trees.
 	* **1mill_rows_maker**- Groups all the files in a folder, outputs 1 million rows csv file, then outputs files based on selected query.
+	* **sentistren**- Made to compute sentimental analysis using senstrength.jar software.
