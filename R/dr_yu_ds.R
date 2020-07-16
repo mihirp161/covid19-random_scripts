@@ -1,3 +1,6 @@
+#For USF SAIL
+# ~Mihir
+
 options(scipen = 9999)
 library(data.table)
 library(qdapRegex)
