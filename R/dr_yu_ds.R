@@ -94,7 +94,14 @@ merged_1_2_user$Hashtag <- sapply(qdapRegex::rm_hash(merged_1_2_user$complete_te
 
 #attach mentions by grouping all the texts
 merged_1_2_user$Mentions <- sapply(stringr::str_extract_all(transform(merged_1_2_user, 
-                                                                     newcol= paste(text, retweeted_status.text, sep=" "))$newcol,
+                                                                     newcol= paste(
+                                                                       dplyr::mutate(merged_1_2_user, 
+                                                                                     mycoltext = dplyr::coalesce(extended_tweet.full_text, 
+                                                                                                                 text))$mycoltext,
+                                                                       dplyr::mutate(merged_1_2_user, 
+                                                                                     mycolrttext = dplyr::coalesce(retweeted_status.extended_tweet.full_text,
+                                                                                                                   retweeted_status.text))$mycolrttext,
+                                                                       sep=" "))$newcol,
                                                            "@[[:alnum:]]+"), 
                                                             paste0, collapse=";")
 
@@ -128,3 +135,4 @@ merged_1_2_user <- merged_1_2_user %>%
                                   Mentions)
 
 readr::write_excel_csv(merged_1_2_user, "plandemic_data_march_june.csv")
+
