@@ -56,4 +56,4 @@ sam_ndf <- sam_ndf %>% dplyr::select(user_screen_name, profile_url)
 
 readr::write_excel_csv(rbinded_dfs,"july_people_full_randomised.csv")
 
-readr::write_excel_csv(sam_ndf,"july_people_for_annotation_sample.csv")
+readr::write_excel_csv(sam_ndf,"july_people_for_annotation_sample1.csv")
