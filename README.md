@@ -25,7 +25,7 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **TPMOD_csv_makers**- upgraded version of *specific_column_csv_writer.R* written for topic-modeling people.    
 	* **tweet_text_entropy**- computes the entropy of tweets and measures the cosine similarty of tweets.    
 	* **pre_adjaceny_list_csv_step**- Vectorised version of combining tweet texts. Pretty fast.    
-	* **senti_stren_viz**- extension of sentistren.py. It's purpose is to create graph and do further analysis.    
+	* **post_sentistren**- extension of sentistren.py. It's purpose is to create graph and do further analysis.    
 	* **only_in_fl**- gets the florida specific csvs only.   
 * python (./python)
 	* **populate_bot_files** - Script for collecting Botometer scores from an output.csv *(this file contains 1 col usernames)*       
