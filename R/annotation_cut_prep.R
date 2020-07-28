@@ -15,6 +15,7 @@ data <- data.table::rbindlist(temp, fill = T) #make a df
 setwd('..')
 #This work uses botometer files created between June 15-30 (Botometer ran on 07-03 to 07-05)
 
+#----------------------
 #formula
 # 1. use the most recent twitter accounts collected (perhaps between July 1-July 14)
 # 2. using the botometer score, sample 500 accounts following the formula:
@@ -23,37 +24,68 @@ setwd('..')
 #   c. 20% from CAP between 0.4 and 0.8
 # 3. create the spreadsheet pre-defined by Meagan (double-check with Meagan regarding the format of the spreadsheet.)
 
-all_8 <- data %>%
-          dplyr::filter(cap_english > 0.8)
+
+# all_8 <- data %>%
+#           dplyr::filter(cap_english > 0.8)
+# 
+# all_4 <- data %>%
+#           dplyr::filter(cap_english < 0.4)
+# 
+# all_in_4_and_8 <- data %>%
+#                     dplyr::filter(cap_english >= 0.4 & cap_english <= 0.8)
+# 
+# #randomised the placements
+# more_than_8 <- all_8[sample(.N, ceiling(0.40*nrow(all_8)), replace = F)]
+# 
+# less_than_4 <-  all_4[sample(.N, ceiling(0.40*nrow(all_4)), replace = F)]
+# 
+# between_4_and_8 <- all_in_4_and_8[sample(.N, ceiling(0.20*nrow(all_in_4_and_8)), replace = F)]
+# 
+# #shffle the rows randomly withou replacement
+# set.seed(786)
+# rbinded_dfs <- dplyr::bind_rows(more_than_8,less_than_4,between_4_and_8)
+
+#----------------------
+# new formula
+
+# a. 60% from >= 0.8
+# b. 40% from <0.8 
+
+all_6 <- data %>%
+          dplyr::filter(cap_english >= 0.8)
 
 all_4 <- data %>%
-          dplyr::filter(cap_english < 0.4)
-  
-all_in_4_and_8 <- data %>%
-                    dplyr::filter(cap_english >= 0.4 & cap_english <= 0.8)
+          dplyr::filter(cap_english < 0.8)
 
 #randomised the placements
-more_than_8 <- all_8[sample(.N, ceiling(0.40*nrow(all_8)), replace = F)]
-  
-less_than_4 <-  all_4[sample(.N, ceiling(0.40*nrow(all_4)), replace = F)]
-  
-between_4_and_8 <- all_in_4_and_8[sample(.N, ceiling(0.20*nrow(all_in_4_and_8)), replace = F)]
+above_8 <- all_6[sample(.N, ceiling(0.60*nrow(all_6)), replace = F)]
+
+below_8 <-  all_4[sample(.N, ceiling(0.40*nrow(all_4)), replace = F)]
 
 #shffle the rows randomly withou replacement
 set.seed(786)
-rbinded_dfs <- dplyr::bind_rows(more_than_8,less_than_4,between_4_and_8)
+
+total_dfs <- dplyr::bind_rows(above_8, below_8)
+  
+rbinded_dfs <- dplyr::bind_rows(above_8[sample(.N, ceiling(0.60*20), replace = F)],
+                                below_8[sample(.N, ceiling(0.40*20), replace = F)])
+
 
 #add the urls for profile (some may get suspended or change their names)
 rbinded_dfs$profile_url <- paste0("https://twitter.com/", rbinded_dfs$user_screen_name)
 
-shuffled_rows <- sample(nrow(rbinded_dfs), replace = F)
-rbinded_dfs <- rbinded_dfs[shuffled_rows, ]
 
-sam_ndf <- rbinded_dfs[1:20,]
-sam_ndf <- sam_ndf %>% dplyr::select(user_screen_name, profile_url)
+# shuffled_rows <- sample(nrow(rbinded_dfs), replace = F)
+# rbinded_dfs <- rbinded_dfs[shuffled_rows, ]
+# 
+# sam_ndf <- rbinded_dfs[1:20,]
+
+#sam_ndf <- sam_ndf %>% dplyr::select(user_screen_name, profile_url, cap_english)
+
+sam_ndf <- rbinded_dfs %>% dplyr::select(user_screen_name, profile_url, cap_english)
 
 #subtract the people who have been picked
 
-readr::write_excel_csv(rbinded_dfs,"july_people_full_randomised.csv")
+readr::write_excel_csv(total_dfs,"july_people_full_run3.csv")
 
-readr::write_excel_csv(sam_ndf,"july_people_for_annotation_sample1.csv")
+readr::write_excel_csv(sam_ndf,"july_people_for_annotation_sample1_run3.csv")
