@@ -51,6 +51,19 @@ setwd('..')
 # a. 60% from >= 0.8
 # b. 40% from <0.8 
 
+setwd('C:\\Users\\ThinkPad\\Desktop\\July Botometer USF DATA 1')
+
+data <- data.table::fread("july_people_for_annotation_10P_run3_special.csv")
+
+# OR------------
+#files <- list.files( pattern="*.csv$")
+
+#read only columns that we want
+# temp <- lapply(files, function(x) readr::read_csv(x))
+# data <- data.table::rbindlist(temp, fill = T) #make a df
+
+#setwd('..')
+
 all_6 <- data %>%
           dplyr::filter(cap_english >= 0.8)
 
@@ -58,17 +71,17 @@ all_4 <- data %>%
           dplyr::filter(cap_english < 0.8)
 
 #randomised the placements
-above_8 <- all_6[sample(.N, ceiling(0.60*nrow(all_6)), replace = F)]
+above_8 <- all_6[sample(.N, ceiling(0.50*nrow(all_6)), replace = F)]
 
-below_8 <-  all_4[sample(.N, ceiling(0.40*nrow(all_4)), replace = F)]
+below_8 <-  all_4[sample(.N, ceiling(0.50*nrow(all_4)), replace = F)]
 
 #shffle the rows randomly withou replacement
 set.seed(786)
 
 total_dfs <- dplyr::bind_rows(above_8, below_8)
   
-rbinded_dfs <- dplyr::bind_rows(above_8[sample(.N, ceiling(0.60*20), replace = F)],
-                                below_8[sample(.N, ceiling(0.40*20), replace = F)])
+rbinded_dfs <- dplyr::bind_rows(above_8[sample(.N, ceiling(0.50*60), replace = F)],
+                                below_8[sample(.N, ceiling(0.50*60), replace = F)])
 
 
 #add the urls for profile (some may get suspended or change their names)
@@ -84,8 +97,16 @@ rbinded_dfs$profile_url <- paste0("https://twitter.com/", rbinded_dfs$user_scree
 
 sam_ndf <- rbinded_dfs %>% dplyr::select(user_screen_name, profile_url, cap_english)
 
+
+names(sam_ndf)[names(sam_ndf) == 'user_screen_name'] <- 'ScreenName'
+names(sam_ndf)[names(sam_ndf) == 'profile_url'] <- 'URL'
+
+shuffled_rows <- sample(nrow(sam_ndf), replace = F)
+sam_ndf <- sam_ndf[shuffled_rows, ]
+
 #subtract the people who have been picked
+
+readr::write_excel_csv(sam_ndf,"july_people_for_annotation_10P_run3_special.csv")
 
 readr::write_excel_csv(total_dfs,"july_people_full_run3.csv")
 
-readr::write_excel_csv(sam_ndf,"july_people_for_annotation_sample1_run3.csv")
