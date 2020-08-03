@@ -24,6 +24,3 @@ keywordMatching <- function(dir, keywords){ # Function in itself uses parallel c
 
 # Testing functionality
 faceMaskTweets <- keywordMatching("data", "masks")
-# Feature alert --LOL # 5G picks up urls containing '5G' -- Need to fix
-five5GTweets <- keywordMatching("data", "5g")
-
