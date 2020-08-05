@@ -76,4 +76,19 @@ target_bot <- target_bot[target_bot$cap_english.Tar >0.5, ]
 edgelist_file <- edgelist_file[(edgelist_file$Source %in% source_bot$Source), ]
 
 #then trim with SOURCE
-edgelist_file <- edgelist_file[(edgelist_file$Target %in% target_bot$Target), ]
+#edgelist_file <- edgelist_file[(edgelist_file$Target %in% target_bot$Target), ]
+
+
+readr::write_excel_csv(edgelist_file, "march_edgelist_botometer_filter.csv")
+
+#-------------------------------------------------------------------------------------------------------------------
+edgelist_file_ori <- data.table:::fread("csv_edgeList_march_ab6.csv")
+
+# edgelist_file[!duplicated(edgelist_file$Source), ]
+
+
+
+
+
+
+
