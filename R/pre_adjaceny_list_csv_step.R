@@ -5,11 +5,7 @@ options(scipen = 99999, warn = -1, stringsAsFactors = FALSE)
 library(dplyr)
 library(readr)
 library(data.table)
-#library(purrr)
-#library(parallel)
-# library(doParallel)
-# library(snow)
-#library(future)
+
 #-------- read user data
 
 #setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/userr/march/')
@@ -84,6 +80,7 @@ reply_data <- data.table::rbindlist(temp, fill = T)
 rm(temp)
 setwd('..')
 
+
 #setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/')
 
 #---------- bind to make one big df
@@ -117,15 +114,20 @@ rm(quoted_data)
 
 #add the comeplete text column 
 merged$complete_texts <- ifelse(!grepl('^RT', merged$text),
-                                            yes = ifelse((nchar(merged$text) < nchar(merged$extended_tweet.full_text))& !is.na(merged$extended_tweet.full_text),
-                                                         yes = merged$extended_tweet.full_text,
-                                                         no = merged$text
-                                            ),
-                                            no = ifelse((nchar(merged$retweeted_status.text) < nchar(merged$retweeted_status.extended_tweet.full_text))& !is.na(merged$retweeted_status.extended_tweet.full_text),
-                                                        yes = merged$retweeted_status.extended_tweet.full_text,
-                                                        no = merged$retweeted_status.text
-                                            )
-                                      )
+                                        yes = ifelse((nchar(merged$text) < nchar(merged$extended_tweet.full_text)) & !is.na(merged$extended_tweet.full_text),
+                                                     yes = merged$extended_tweet.full_text,
+                                                     no = merged$text
+                                        ),
+                                        no = ifelse((nchar(merged$retweeted_status.text) < nchar(merged$retweeted_status.extended_tweet.full_text))& !is.na(merged$retweeted_status.extended_tweet.full_text),
+                                                    yes =  ifelse((nchar(merged$quoted_status.text) < nchar(merged$quoted_status.extended_tweet.full_text)) & !is.na(merged$quoted_status.extended_tweet.full_text),
+                                                                  yes= paste0(merged$retweeted_status.extended_tweet.full_text, " ", merged$quoted_status.extended_tweet.full_text),
+                                                                  no= paste0(merged$retweeted_status.extended_tweet.full_text, " ", merged$quoted_status.text)),
+                                                    no = ifelse((nchar(merged$quoted_status.text) < nchar(merged$quoted_status.extended_tweet.full_text)) & !is.na(merged$quoted_status.extended_tweet.full_text),
+                                                                yes= paste0(merged$retweeted_status.text, " ", merged$quoted_status.extended_tweet.full_text),
+                                                                no= paste0(merged$retweeted_status.text, " ", merged$quoted_status.text))
+                                  )
+                                )
 
 #write to a query ready file
 readr::write_excel_csv(merged, "first_july_2_weeks_dre.csv")
+
