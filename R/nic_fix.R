@@ -74,7 +74,7 @@ people <- c("Mihir")
 setwd('..')
 #loop through end of each split, and write file with i
 for (i in seq_along(groups)) {
-  readr::write_excel_csv(groups[[i]], paste0("tweet_id_str_", people[i], "reop.csv")) 
+  writeLines(groups[[i]]$id_str, paste0("tweet_id_str_", people[i], "_reop.txt"))
 }
 
 #EOF
