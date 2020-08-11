@@ -6,7 +6,7 @@ library(httpuv)
 library(rtweet)
 library(tidyverse)
 
-setwd('C:\\Users\\ThinkPad\\Downloads\\Conspiracy Theory-selected')
+setwd('C:\\Users\\ThinkPad\\Desktop\\New folder (6)')
 
 # # authenticate via web browser
 # token <- rtweet::create_token(
@@ -31,15 +31,12 @@ setwd('C:\\Users\\ThinkPad\\Downloads\\Conspiracy Theory-selected')
 
 #rtweet::get_token()
 
-id_str_df <- readr::read_csv("tweet_id_str_Dre.csv")
+id_str_df <- readr::read_csv("tweet_id_str_Mihir_reop.csv")
 
 id_str_df$id_str <- as.character(id_str_df$id_str)
 
 # split the df every 90k
 groups <- (split(id_str_df, (seq(nrow(id_str_df))-1) %/% 90000))
-
-
-setwd('..')
 
 
 #loop through end of each split, and get the status id
@@ -63,5 +60,9 @@ for (i in seq_along(groups)) {
   Sys.sleep(901)
 }
 
+# caould have overwritten, but that's ok.
+new_df <- df %>% dplyr::mutate_if(is.list,as.character)
+
 #write to file
-readr::write_excel_csv(df, "df_nic_status_complete.csv")
+readr::write_excel_csv(new_df, "reop_nic_complete_status.csv")
+
