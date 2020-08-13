@@ -9,7 +9,7 @@ library(stringi)
 
 #---------------------------------- read the file---------------------------------------
 
-this_path <- 'C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\reop\\'
+this_path <- 'C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\plan\\'
 setwd(this_path)
 
 #filenames
@@ -66,15 +66,17 @@ id_str_only <- data %>% dplyr::select(id_str)
 id_str_only <- id_str_only[!duplicated(id_str_only$id_str)]
 
 id_str_only$id_str <- as.character(id_str_only$id_str)
+
+id_str_only <- id_str_only[id_str_only$id_str!="NA", ]
   
 # get distributable files
-groups <- (split(id_str_only, (seq(nrow(id_str_only))-1) %/% 248593))
+groups <- (split(id_str_only, (seq(nrow(id_str_only))-1) %/% 15749))
 people <- c("Mihir")
 
 setwd('..')
 #loop through end of each split, and write file with i
 for (i in seq_along(groups)) {
-  writeLines(groups[[i]]$id_str, paste0("tweet_id_str_", people[i], "_reop.txt"))
+  writeLines(groups[[i]]$id_str, paste0("tweet_id_str_", people[i], "_plan.txt"))
 }
 
 #EOF
