@@ -6,6 +6,7 @@ library(qdapRegex)
 library(tidyverse)
 library(stringr)
 library(stringi)
+library(data.table)
 
 #---------------------------------- read the file---------------------------------------
 
@@ -18,13 +19,21 @@ files <- list.files( pattern="*.csv$")
 #read only columns that we want
 temp <- lapply(files, function(x) readr::read_csv(x))
 
+
+
+#read the status file
+x <- readr::read_csv("C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\plandemic_rested_status_nic.csv") 
+
+#keep only columns
+x <-  x %>% dplyr::select(id_str, retweet_count, favorite_count)
+
 file_i <- 1
 
 for(t in temp){
   
   df <- t
-
-#----------------------------------- all the fixes-------------------------------------
+  
+  #----------------------------------- all the fixes-------------------------------------
   #attach hashtags
   df$hashtags <- sapply(qdapRegex::rm_hash(df$complete_texts, extract = T), paste0, collapse=";")
   
@@ -34,7 +43,7 @@ for(t in temp){
   
   #attach mentions by grouping all the texts
   df$mentions_screen_name <- sapply(stringr::str_extract_all(df$complete_texts,
-                                    "@[[:alnum:]_]+"), paste0, collapse=";")
+                                                             "@[[:alnum:]_]+"), paste0, collapse=";")
   
   #replace " " with NA
   df$mentions_screen_name <- gsub(' ', NA, df$mentions_screen_name)
@@ -42,6 +51,16 @@ for(t in temp){
   #remove the last instance of ";" with "" in mention id_str
   df$mentions_id_str <- stringi::stri_replace_last_fixed(df$mentions_id_str , ';', '')
   
+  # data.table way of merging the column
+  setDT(df)
+  setDT(x)
+  
+  #join
+  df[x, on = .(id_str), `:=`(retweet_count = i.retweet_count, favorite_count = i.favorite_count)]
+  
+  #remove rows that are NA on complete text
+  df <- df[!is.na(df$complete_texts), ]
+
   setwd('..')
   
   #overwrite
@@ -52,31 +71,16 @@ for(t in temp){
   setwd(this_path)
 }
 
-#------------------------------- get all the tweet_ids for the REST method --------------------------
-data <- data.table::rbindlist(temp, fill = T) #make a df
 
-rm(t, df, files, file_i)
+#----------------------------- check the completed tables ---------------------------
+this_path <- 'C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\check_this2\\'
+setwd(this_path)
 
+#filenames
+files <- list.files( pattern="*.csv$")
 
-#get all the tweet id_str
+#read only columns that we want
+temp <- lapply(files, function(x) readr::read_csv(x)) %>% dplyr::bind_rows()
 
-id_str_only <- data %>% dplyr::select(id_str)
-
-#remove duplicates
-id_str_only <- id_str_only[!duplicated(id_str_only$id_str)]
-
-id_str_only$id_str <- as.character(id_str_only$id_str)
-
-id_str_only <- id_str_only[id_str_only$id_str!="NA", ]
-  
-# get distributable files
-groups <- (split(id_str_only, (seq(nrow(id_str_only))-1) %/% 15749))
-people <- c("Mihir")
-
-setwd('..')
-#loop through end of each split, and write file with i
-for (i in seq_along(groups)) {
-  writeLines(groups[[i]]$id_str, paste0("tweet_id_str_", people[i], "_plan.txt"))
-}
 
 #EOF
