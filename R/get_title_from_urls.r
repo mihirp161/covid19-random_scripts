@@ -1,6 +1,12 @@
-# For USF SAIL
-# ~Wesley, Mihir
+# SAIL Labs
+# ~Wesley, Alex, Mihir
 
+## Description:
+##-------------
+#* This script takes the text columns from the csvs and substitute the URL with the html title tag.
+#* It is a way to increase the words in the text and rather than throwing the URLS away, we use them.
+#* 
+##-------------
 options(scipen = 9999, warn = -1)
 library(rvest)
 library(dplyr)
@@ -58,7 +64,7 @@ get_title_tag <- function(url) {
   
 }
 
-raw_output <- read.csv("output-2020-01-21.csv", stringsAsFactors = FALSE)
+raw_output <- readr::read_csv("some_csv.csv")
 raw_output$text <- gsub("[^\x20-\x7E]", "", raw_output$text)
 raw_output$text <- gsub("[\n]", "", raw_output$text) 
 
@@ -104,4 +110,6 @@ rm(a)
 #remove the urls, otherwise you can run like above again.
 raw_output$title_text <- qdapRegex::rm_url(raw_output$title_text, pattern= qdapRegex::pastex("@rm_twitter_url", "@rm_url"))
 
-write.csv(raw_output, "21_jan_file.csv")
+readr::write_excel_csv(raw_output, "some_csv_with_url_gone.csv")
+
+#EOF
