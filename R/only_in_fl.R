@@ -1,17 +1,23 @@
-#For USF SAIL
-# ~M
+# SAIL Labs
+# ~Mihir
+
+## Description:
+##-------------
+#* Reads bunch of csvs and only keeps the users who are from Florida.
+##-------------
+
 options(scipen = 999)
 
 library(data.table)
 library(readr)
 
 #------------------------ read the files for location ------------------------------------------
-setwd('./location_bunch/')
+setwd('./file_path/')
 
 #filenames
 files <- list.files( pattern="*.csv$")
 
-#read only columns that we want
+#read
 temp <- lapply(files, function(x) readr::read_csv(x))
 
 loco_data <- data.table::rbindlist(temp, fill = T) #make a df
@@ -29,12 +35,12 @@ loco_subbed <- loco_data[Reduce(`|`, Map(`%like%`, list(place.full_name), c(', F
 rm(loco_data)
 #------------------------ read the files for queried csv ------------------------------------------
 
-setwd('./test_files/')
+setwd('./file_path/')
 
 #filenames
 files <- list.files( pattern="*.csv$")
 
-#read only columns that we want
+#read
 temp <- lapply(files, function(x) readr::read_csv(x))
 
 filter_data <- data.table::rbindlist(temp, fill = T) #make a df
@@ -48,4 +54,6 @@ setwd('..') #goes back once
 tuc_mary_csv <- merge(filter_data, loco_subbed, by="id_str")
 
 #then write the data to file
-readr::write_excel_csv(tuc_mary_csv, "march_mask_fl.csv")
+readr::write_excel_csv(tuc_mary_csv, "florida_data.csv")
+
+#EOF
