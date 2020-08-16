@@ -1,25 +1,16 @@
-# For USF SAIL
+# SAIL Labs
 # ~Dre, Mihir
 
+## Description:
+##-------------
+#* Takes a csv with 100s of columns and merged some of the columns if they share column names. 
+#* Currently this script is using "+" as a delimiter however you can change it to whatever you like. 
+#* Don't pick "," because they will end up creating columns.
+##-------------
+
+
 library(data.table)
-
-################# Ignore for now please ##########################
-#library(jsonlite)
-# pagesize <- 10
-# con <- "2020-04-05-20_cleaned.json"
-# initialJSON <-  readLines(con, n = pagesize)
-# collapsedJSON <- paste(initialJSON[1:pagesize], collapse="")
-# 
-# collapsedJSON <- substr(collapsedJSON, 1, nchar(collapsedJSON)-1)
-# collapsedJSON <- sub('.', '', collapsedJSON)
-# 
-# fixedJSON <- sprintf("[%s]", collapsedJSON, collapse= ",")
-# 
-# readJSON <- jsonlite::fromJSON(fixedJSON)
-# 
-# test <- t(as.data.frame(lapply(readJSON, as.character), stringsAsFactors=FALSE))
-
-#################################################################
+library(tidyverse)
 
 #Caution: Looks ugly, but it's better to add the delimitor in rather than nothing. So + seperate stuff. If NA then 
 #               there would be no gap
@@ -98,6 +89,7 @@ remove_combined_cols <- function(nm_itr, df){
 #read all the screen_names FROM THE MULTIPLE DATAFRAME! Also don't rename now, do it later.
 nm <- grep("node_entities_user_mentions.+screen_name$", colnames(multiples_dat), value = T)
 
+#now merge all the columns with same name. I.e. text.1, text.2, text.3 and so on. Delimeter is a "+" symbol
 multiples_dat$combined_node_entitied_screen_names<-  apply(multiples_dat[ , nm] , 1 , paste , collapse = "+" )
 
 multiples_dat <- remove_combined_cols(nm, multiples_dat) #call the func. to remove the columns that we combined
@@ -144,7 +136,9 @@ multiples_dat <- remove_combined_cols(nm, multiples_dat)
 new_df <- data.frame(distinct_dat, multiples_dat)
 
 #and write it to a file
-write.csv(new_df, file='totally_cleaned.csv')
+readr::write_excel_csv(new_df, 'totally_cleaned.csv')
 
 #just read it to make sure, leave it commented
-#test <- read.csv("totally_cleaned.csv", stringsAsFactors = F)
+#test <- readr::read_csv("totally_cleaned.csv", stringsAsFactors = F)
+
+#EOF

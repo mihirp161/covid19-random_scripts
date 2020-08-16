@@ -1,5 +1,11 @@
-# For USF SAIL
+# SAIL Labs
 # ~Mihir
+
+## Description:
+##-------------
+#* This file was created to facilitate Dr Yu's work. He has a specific csv format
+#* so use this file to make what he likes. This one greates a dfm like matrix.
+##-------------
 
 options(scipen = 9999)
 library(data.table)
@@ -9,57 +15,51 @@ library(tidyverse)
 library(tidyr)
 
 #--------------------------- hashtags mentions ---------------------------------------
-#Read in the csv file
+#Read in the hashtag and mention files
+
 # set the path of where the csv files are and end the file path with / character. In windows swap \ with /
 
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/hastags_mentionsr')
-setwd("C:\\Users\\ThinkPad\\SpyderProjects\\USCStuff\\yu_stuff\\mentions_hastags")
+setwd("/files_path/")
 
 #filenames
 files <- list.files( pattern="*.csv$")
 
-#read only columns that we want
+#read
 temp <- lapply(files, function(x) readr::read_csv(x))
 
 hash_data <- data.table::rbindlist(temp, fill = T) #make a df
 
 
 #--------------------------- queried hashtags tweet---------------------------------------------
-#Read in the csv file
-# set the path of where the csv files are and end the file path with / character. In windows swap \ with /
+#Read in files that have been filtered with queried hastags
 
-#setwd('/work_bgfs/m/mkpatel/SCRIPT/shit_hastags/tweets_filtered')
-setwd("C:\\Users\\ThinkPad\\SpyderProjects\\USCStuff\\yu_stuff\\filtered_tweet")
+setwd("/files_path/")
 
 #filenames
 files <- list.files( pattern="*.csv$")
 
-#read only columns that we want
+#read
 temp <- lapply(files, function(x) readr::read_csv(x))
 
 tweet_data <- data.table::rbindlist(temp, fill = T) #make a df
 
 #-------------------------------------------------- reply ------------------------------------------
-#Read in the csv file
-# set the path of where the csv files are and end the file path with / character. In windows swap \ with /
+#Read in the csv files containing replies
 
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/replyr')
-setwd("C:\\Users\\ThinkPad\\SpyderProjects\\USCStuff\\yu_stuff\\reply")
+setwd("/files_path/")
 
 #filenames
 files <- list.files( pattern="*.csv$")
 
-#read only columns that we want
+#read
 temp <- lapply(files, function(x) readr::read_csv(x))
 
 reply_data <- data.table::rbindlist(temp, fill = T) #make a df
 
 #--------------------------------------------------------- user ------------------------------------------
-#Read in the csv file
-# set the path of where the csv files are and end the file path with / character. In windows swap \ with /
+#Read in the csv file that have all the user related information
 
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/userr')
-setwd("C:\\Users\\ThinkPad\\SpyderProjects\\USCStuff\\yu_stuff\\user")
+setwd("/files_path/")
 
 
 #filenames
@@ -102,7 +102,8 @@ rm(user_data,merged_1_tweet)
 #attach hashtags
 merged_1_2_user$Hashtag <- sapply(qdapRegex::rm_hash(merged_1_2_user$complete_texts, extract = T), paste0, collapse=";")
 
-#attach mentions by grouping all the texts
+#attach mentions by grouping all the texts then extrating only the @ part.
+# FYI, coalesce() function merges columns and takes adjacent values if any value is NA
 merged_1_2_user$Mentions <- sapply(stringr::str_extract_all(transform(merged_1_2_user, 
                                                                       newcol= paste(
                                                                         dplyr::mutate(merged_1_2_user, 
@@ -140,4 +141,6 @@ combination_tbl <- combination_tbl %>%
                     )
 
 #write the data.frame to file
-readr::write_excel_csv(combination_tbl, "plandemic_matrix_data_march_june.csv")
+readr::write_excel_csv(combination_tbl, "matrix_file.csv")
+
+#EOF

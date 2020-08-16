@@ -24,3 +24,5 @@ keywordMatching <- function(dir, keywords){ # Function in itself uses parallel c
 
 # Testing functionality
 faceMaskTweets <- keywordMatching("data", "masks")
+
+#EOF

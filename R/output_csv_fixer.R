@@ -1,5 +1,12 @@
-#For USF SAIL
-#~Mihir Patel
+# SAIL Labs
+# ~Mihir
+
+## Description:
+##-------------
+#* This file removes the usernames that have been already processed, copies all the botometer score csv
+#* to a new directory. THis file also rename files with date so we know when the scores files were made.
+##-------------
+
 
 library(data.table)
 library(dplyr)
@@ -54,10 +61,12 @@ message("Please don't delete the BOT_CSV_OLD directory, it contains the work you
 
 #read
 outputcsv_file <- readr::read_csv("output.csv") #in linux, just to read.csv("output.csv",stringsAsFactors = F)
-colnames(botcsv_data) <- "screenNames"
+colnames(botcsv_data) <- "user_screen_name"
 #now compare the two frame and remove the rows which are in 
 
-outputcsv_file <- dplyr::anti_join(outputcsv_file,botcsv_data, by= "screenNames")
+outputcsv_file <- dplyr::anti_join(outputcsv_file,botcsv_data, by= "user_screen_name")
 
 #write the file back
 readr::write_csv(outputcsv_file, "output.csv") #in linux, do write.csv("output.csv")
+
+#EOF
