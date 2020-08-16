@@ -1,5 +1,11 @@
-# FOR USF SAIL
+# SAIL Labs
 # ~Mihir
+
+## Description:
+##-------------
+#* This script keep all the users who aren't processed from a csv file which we use 
+#* to run botometer from. (OLD WAY, use output_csv_fixer.R)
+##-------------
 
 library(data.table)
 library(dplyr)
@@ -17,7 +23,7 @@ botcsv_data <- data.table::rbindlist(temp, fill = T) #make a df
 
 #create a directory
 setwd('..') #goes back once
-dir.create("./USC_PROCESSED_ACCOUNTS_MOVE_TO_CIRCE/") #(Give path )
+dir.create("./PROCESSED_ACCOUNTS_MOVE_TO_CIRCE/") #(Give path )
 
 setwd('./BOT_CSV/')
 
@@ -40,14 +46,14 @@ processed_file <- dplyr::inner_join(botcsv_data, outputcsv_file, by="user_screen
 #apply(is.na(processed_file),2,sum)
 
 #write the file back
-write.csv(processed_file, "usc_users_processed.csv", row.names = F) #in linux, do write.csv("output.csv")
+write.csv(processed_file, "users_processed.csv", row.names = F) #in linux, do write.csv("output.csv")
 
 #------------------------------------------------- move the file to a new folder or somethig --------------------------------------
 
 
 #copy all the exports file to a new folder name them accordingly to prevent deletion and overwritinh
-file.copy("usc_users_processed.csv",
-          to = "./USC_PROCESSED_ACCOUNTS_MOVE_TO_CIRCE/", recursive = T,
+file.copy("users_processed.csv",
+          to = "./PROCESSED_ACCOUNTS_MOVE_TO_CIRCE/", recursive = T,
           overwrite = T, copy.mode = T, copy.date = F)
 
 
@@ -59,4 +65,4 @@ final_output_usc <- dplyr::anti_join(data.frame(user_screen_name=outputcsv_file$
 
 write.csv(final_output_usc, "output_YOURNAME_en.csv", row.names = F) #in linux, do write.csv("output.csv")
 
-
+#EOF
