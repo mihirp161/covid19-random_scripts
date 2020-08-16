@@ -1,14 +1,20 @@
-#For USF SAIL
-#~Mihir
+# SAIL Labs
+# ~Mihir
+
+## Description:
+##-------------
+#* joins the bot scores to edgelist csv files (OLD)
+##-------------
+
 library(tidyverse)
 library(data.table)
 library(plyr)
 
 #read the original gephi csv output file
-hunK_bot_analysisFile <- readr::read_csv("100k.0424.bot.analysis.csv")
+hunK_bot_analysisFile <- readr::read_csv("edgelist_file.csv")
 
 #go to where expoerted csv files are (these are probably the one you get when you run populate_bot_fils.py)
-setwd('./exports/')
+setwd('./files_path/')
 
 #filenames
 files <- list.files( pattern="*.csv$")
@@ -27,9 +33,8 @@ complete_hunK_bot_file <- plyr::join(hunK_bot_analysisFile, exports_data, type="
 
 #uncomment these if you were asked to not include NAs
 #complete_hunK_bot_file <- merge(hunK_bot_analysisFile, exports_data, by="Id")
-#readr::write_csv(complete_hunK_bot_file, "100k.0424.bot.analysisWITHOUT_NA.csv")
 
 #write
-readr::write_csv(complete_hunK_bot_file, "100k.0424.bot.analysisWITH_NA.csv")
+readr::write_csv(complete_hunK_bot_file, "edgelist_file_with_bots.csv")
 
 #EOF
