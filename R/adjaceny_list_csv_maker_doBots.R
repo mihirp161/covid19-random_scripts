@@ -14,9 +14,7 @@ library(dplyr)
 
 #-------------------------------------------------- read botometer scores ---------------------------------------
 # read the portion files
-
 setwd('/path_to_files/')
-
 
 #filenames 
 files <- list.files( pattern="*.csv$")
@@ -25,7 +23,6 @@ files <- list.files( pattern="*.csv$")
 temp <- lapply(files, function(x) readr::read_csv(x))
 full_portions <- data.table::rbindlist(temp, fill = T) #make a dt
 full_portions <- full_portions[!duplicated(full_portions$user_screen_name), ]
-
 
 # read the bot scores files
 setwd('/path_to_files/')
@@ -54,9 +51,7 @@ full_portions <- full_portions[ ,2:3]
 
 setwd('/path_to_files/')
 
-
 #-------------------------------------------------- read the edglist file ---------------------------------------
-
 
 #read the normal edgelist csv file
 edgelist_file <- data.table:::fread("csv_edgeList_file.csv")
