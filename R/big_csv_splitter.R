@@ -3,7 +3,7 @@
 
 ## Description:
 ##-------------
-#* Splits giant csv into multiple parts based on n rows.
+#* Splits huge csv into multiple parts based on n rows.
 ##-------------
 
 # R method to make multiple csvs based on Rows.

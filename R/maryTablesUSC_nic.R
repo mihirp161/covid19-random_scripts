@@ -1,24 +1,24 @@
-# FOR USF SAIL
-# Dre, Mihir
+# SAIL Labs
+# ~Dre, Mihir
+
+## Description:
+##-------------
+#* This file make a csv file according to what Dr Nic needs. This one specifically
+#* focuses on tweet and location related data. Again, uses batch file, and converts json/l file
+##-------------
 
 options(scipen = 999999)
-#install.packages("dplyr",repos='http://cran.us.r-project.org')
-library("dplyr")
-#install.packages("readr",repos='http://cran.us.r-project.org')
-library("readr")
-#install.packages("stringr",repos='http://cran.us.r-project.org')
-library("stringr")
-#install.packages("tidyselect",repos='http://cran.us.r-project.org')
-library("tidyselect")
-#install.packages("ndjson", repos='http://cran.us.r-project.org')
-library("ndjson")#, lib.loc="/tmp/RtmpDG5v7Q/downloaded_packages")
-#install.packages("doParallel")
-#library("doParallel")
-library("data.table")
-
+library(dplyr)
+library(readr)
+library(stringr)
+library(tidyselect)
+library(ndjson)
+library(data.table)
+library(tibble)
+library(purrr)
 
 #------------------------------------------- File paths and destination paths ---------------------------------#
-#setwd("/shares_bgfs/si_twitter/Dred-MPColab/Mary_files_April_jsons/")
+
 args <- commandArgs(trailingOnly = FALSE)
 fileNames_all <- args[6] 
 fileLocation <- fileNames_all
@@ -31,7 +31,7 @@ endLocation_pre <- sapply(endLocation_pre,tail, 1) #access the last elemnt of li
 print(paste0("true file name: ", endLocation_pre))
 
 #-------------------------------- Read in the json/l files ---------------------------------------------------#
-#fileNames_all[i]
+
 #read the json here and make whatever
 message("starting...")
 
@@ -199,13 +199,15 @@ message("binding cols done...")
 #----------------------------------------------------------------------------------------------------------
 
 #update the path
-nicDataLoc <- "C:\\Users\\ThinkPad\\Downloads\\test\\"
+nicDataLoc <- '/nic_data_path/'
 
 endLocation_pre <- sub('\\..*$', '', endLocation_pre)
 
-readr::write_excel_csv(x = nicData, path = paste0(nicDataLoc,endLocation_pre, "_quotedData.csv"))
+readr::write_excel_csv(x = nicData, path = paste0(nicDataLoc,endLocation_pre, "_nicData.csv"))
 
 
 print(paste0("Finished with: ",endLocation_pre))
 rm(list=ls())
 quit()
+
+#EOF
