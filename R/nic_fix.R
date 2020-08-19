@@ -1,5 +1,13 @@
-# For USF SAIL
+# SAIL Labs
 # ~Mihir
+
+## Description:
+##-------------
+#* Since our twitter data was collected with a stream data, we used rest menthod to collect all the 
+#* counts. This script extract all the tweet id_strings from the existing queried csv file. This way,
+#* we can run them through hydrator. This script also fixes all the mention and hastags labels from USF data.
+##-------------
+
 
 options(scipen = 9999)
 library(qdapRegex)
@@ -9,7 +17,7 @@ library(stringi)
 
 #---------------------------------- read the file---------------------------------------
 
-this_path <- 'C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\plan\\'
+this_path <- 'set_a_working_directory_path'
 setwd(this_path)
 
 #filenames
