@@ -1,5 +1,11 @@
-# FOR USF SAIL
-# Mihir
+# SAIL Labs
+# ~Mihir
+
+## Description:
+##-------------
+#* This file get the hydrated json/l file which we made for Dr Nic and only makes csvs
+#* with columns which we couldn't get from our stream collecting method.
+##-------------
 
 options(scipen = 999999)
 library(dplyr)
@@ -16,7 +22,6 @@ parsedTweets <- ndjson::stream_in("tweet_id_str_Mihir_plan.jsonl", cls="dt") %>%
 parsedTweets[parsedTweets == "NA"]  <- ""
 
 # select only the items we need
-
 final_df <- parsedTweets %>% dplyr::select(id_str, retweet_count, favorite_count, full_text)
 
 #write to a file now
