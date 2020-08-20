@@ -1,5 +1,12 @@
-# For USF SAIL
+# SAIL Labs
 # ~Mihir
+
+## Description:
+##-------------
+#* after we have hydrated the files to get all the retweet counts and favorite counts, 
+#* we can use this file to join the columns. You will need the queried csv files, and 
+#* hydrated csv file which was convereted using some table file.
+##-------------
 
 options(scipen = 9999)
 library(qdapRegex)
@@ -10,7 +17,7 @@ library(data.table)
 
 #---------------------------------- read the file---------------------------------------
 
-this_path <- 'C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\plan\\'
+this_path <- 'all_the_queried_filtered_files_location'
 setwd(this_path)
 
 #filenames
@@ -22,7 +29,7 @@ temp <- lapply(files, function(x) readr::read_csv(x))
 
 
 #read the status file
-x <- readr::read_csv("C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\plandemic_rested_status_nic.csv") 
+x <- readr::read_csv("rested_csv_file_complete.csv") 
 
 #keep only columns
 x <-  x %>% dplyr::select(id_str, retweet_count, favorite_count)
@@ -55,7 +62,7 @@ for(t in temp){
   setDT(df)
   setDT(x)
   
-  #join
+  #join and replace the existing columns with same name. Newly added columns are updated
   df[x, on = .(id_str), `:=`(retweet_count = i.retweet_count, favorite_count = i.favorite_count)]
   
   #remove rows that are NA on complete text
@@ -70,17 +77,6 @@ for(t in temp){
   
   setwd(this_path)
 }
-
-
-#----------------------------- check the completed tables ---------------------------
-this_path <- 'C:\\Users\\ThinkPad\\Desktop\\New folder (6)\\check_this2\\'
-setwd(this_path)
-
-#filenames
-files <- list.files( pattern="*.csv$")
-
-#read only columns that we want
-temp <- lapply(files, function(x) readr::read_csv(x)) %>% dplyr::bind_rows()
 
 
 #EOF
