@@ -59,4 +59,6 @@ setwd('..') #goes back once
 tuc_mary_csv <- merge(filter_data, loco_subbed, by="id_str")
 
 #then write the data to file
-readr::write_excel_csv(tuc_mary_csv, "july_mask_fl.csv")
+readr::write_excel_csv(tuc_mary_csv, "data_usa_or_fl.csv")
+
+#EOF
