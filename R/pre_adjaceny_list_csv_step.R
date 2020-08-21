@@ -1,5 +1,11 @@
-# For USF SAIL
+# SAIL Labs
 # ~Mihir
+
+## Description:
+##-------------
+#* before we make the edge list file, we can merge all the data together with this file.
+#* Complete text if-else() combines, or replaces right text column.
+##-------------
 
 options(scipen = 99999, warn = -1, stringsAsFactors = FALSE)
 library(dplyr)
@@ -8,8 +14,7 @@ library(data.table)
 
 #-------- read user data
 
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/userr/march/')
-setwd('./userr/')
+setwd('/path_to_user_files/')
 
 #filenames
 files <- list.files(pattern="*.csv$")
@@ -22,9 +27,7 @@ rm(temp)
 setwd('..')
 
 #-------- read tweet data
-
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/march_usc/first_2_week_march_usc/')
-setwd("./first_week_march/")
+setwd("/path_to_tweet_data_first_week/")
 
 #filenames
 files <- list.files( pattern="*.csv$")
@@ -36,8 +39,7 @@ tweet_data <- data.table::rbindlist(temp, fill = T)
 rm(temp)
 setwd('..')
 
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/march_usc/last_2_week_march_usc/')
-setwd('./last_week_march/')
+setwd('/path_to_tweet_data_last_week/')
 
 #filenames
 files <- list.files( pattern="*.csv$")
@@ -50,9 +52,7 @@ rm(temp)
 setwd('..')
 
 #-------- quoted tweet data
-
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/quotedr/march/')
-setwd('./quotedr/')
+setwd('/path_to_quoted_files/')
 
 #filenames
 files <- list.files( pattern="*.csv$")
@@ -66,9 +66,7 @@ setwd('..')
 
 
 #-------- reply data
-
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/replyr/march/')
-setwd('./replyr/')
+setwd('/path_to_reply_files/')
 
 #filenames
 files <- list.files( pattern="*.csv$")
@@ -79,9 +77,6 @@ reply_data <- data.table::rbindlist(temp, fill = T)
 
 rm(temp)
 setwd('..')
-
-
-#setwd('/shares_bgfs/si_twitter/Dred-MPColab/MIHIR PERSONAL TEMP/')
 
 #---------- bind to make one big df
 #merged <- cbind(tweet_data, user_data[,3:ncol(user_data)])
@@ -112,22 +107,34 @@ merged <- merged[-which(duplicated(merged$id_str)), ]
 rm(quoted_data)
 
 
+# #add the comeplete text column (This is a true commplete list method. Quoted text was not part of the study this time)
+# merged$complete_texts <- ifelse(!grepl('^RT', merged$text),
+#                                         yes = ifelse((nchar(merged$text) < nchar(merged$extended_tweet.full_text)) & !is.na(merged$extended_tweet.full_text),
+#                                                      yes = merged$extended_tweet.full_text,
+#                                                      no = merged$text
+#                                         ),
+#                                         no = ifelse((nchar(merged$retweeted_status.text) < nchar(merged$retweeted_status.extended_tweet.full_text))& !is.na(merged$retweeted_status.extended_tweet.full_text),
+#                                                     yes =  ifelse((nchar(merged$quoted_status.text) < nchar(merged$quoted_status.extended_tweet.full_text)) & !is.na(merged$quoted_status.extended_tweet.full_text),
+#                                                                   yes= paste0(merged$retweeted_status.extended_tweet.full_text, " ", merged$quoted_status.extended_tweet.full_text),
+#                                                                   no= paste0(merged$retweeted_status.extended_tweet.full_text, " ", merged$quoted_status.text)),
+#                                                     no = ifelse((nchar(merged$quoted_status.text) < nchar(merged$quoted_status.extended_tweet.full_text)) & !is.na(merged$quoted_status.extended_tweet.full_text),
+#                                                                 yes= paste0(merged$retweeted_status.text, " ", merged$quoted_status.extended_tweet.full_text),
+#                                                                 no= paste0(merged$retweeted_status.text, " ", merged$quoted_status.text))
+#                                   )
+#                                 )
+
 #add the comeplete text column 
 merged$complete_texts <- ifelse(!grepl('^RT', merged$text),
-                                        yes = ifelse((nchar(merged$text) < nchar(merged$extended_tweet.full_text)) & !is.na(merged$extended_tweet.full_text),
-                                                     yes = merged$extended_tweet.full_text,
-                                                     no = merged$text
-                                        ),
-                                        no = ifelse((nchar(merged$retweeted_status.text) < nchar(merged$retweeted_status.extended_tweet.full_text))& !is.na(merged$retweeted_status.extended_tweet.full_text),
-                                                    yes =  ifelse((nchar(merged$quoted_status.text) < nchar(merged$quoted_status.extended_tweet.full_text)) & !is.na(merged$quoted_status.extended_tweet.full_text),
-                                                                  yes= paste0(merged$retweeted_status.extended_tweet.full_text, " ", merged$quoted_status.extended_tweet.full_text),
-                                                                  no= paste0(merged$retweeted_status.extended_tweet.full_text, " ", merged$quoted_status.text)),
-                                                    no = ifelse((nchar(merged$quoted_status.text) < nchar(merged$quoted_status.extended_tweet.full_text)) & !is.na(merged$quoted_status.extended_tweet.full_text),
-                                                                yes= paste0(merged$retweeted_status.text, " ", merged$quoted_status.extended_tweet.full_text),
-                                                                no= paste0(merged$retweeted_status.text, " ", merged$quoted_status.text))
-                                  )
-                                )
-
+                                            yes = ifelse((nchar(merged$text) < nchar(merged$extended_tweet.full_text))& !is.na(merged$extended_tweet.full_text),
+                                                         yes = merged$extended_tweet.full_text,
+                                                         no = merged$text
+                                            ),
+                                            no = ifelse((nchar(merged$retweeted_status.text) < nchar(merged$retweeted_status.extended_tweet.full_text))& !is.na(merged$retweeted_status.extended_tweet.full_text),
+                                                        yes = merged$retweeted_status.extended_tweet.full_text,
+                                                        no = merged$retweeted_status.text
+                                            )
+                                      )
 #write to a query ready file
-readr::write_excel_csv(merged, "first_july_2_weeks_dre.csv")
+readr::write_excel_csv(merged, "2_weeks_data.csv")
 
+#EOF

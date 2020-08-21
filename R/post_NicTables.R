@@ -1,5 +1,10 @@
-# For USF SAIL
+# SAIL Labs
 # ~Mihir
+
+## Description:
+##-------------
+#* We can use this file to finalise Dr Nic's csv after we create all the data.
+##-------------
 
 options(scipen = 99999, warn = -1, stringsAsFactors = FALSE)
 library(dplyr)
@@ -8,7 +13,7 @@ library(data.table)
 
 #-------- read user data
 
-setwd('./5/')
+setwd('./path_to_user_data/')
 
 #filenames
 files <- list.files( pattern="*.csv$")
@@ -38,4 +43,6 @@ nic_data <- subset(nic_data, select= -c(full_text, extended_tweet.full_text))
 
 
 #write it to a file before we filter out
-readr::write_excel_csv(nic_data, "nic_data_5.csv")
+readr::write_excel_csv(nic_data, "dr_nic_data.csv")
+
+#EOF
