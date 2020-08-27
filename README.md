@@ -4,7 +4,7 @@ This repository contains random scripts. You can pick them up as you find them u
 
 ### Note
 
-*Everything here is a work-in-progress. Please connect to member/s listed above your script to get further help!*
+*Everything here is a work-in-progress. Please connect to member/s listed above your script to get further help! These are scripts, therefore they're non-interactable.*
 
 ## Contents
 * R (./R)
