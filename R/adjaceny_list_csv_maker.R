@@ -31,7 +31,8 @@ data <- data.table::rbindlist(temp, fill = T) #make a df
 #currently we will make csv files, focus on .gefx file later on.
 
 #remove all rows with space in the retweets
-data <- data[data$retweeted_status.user.screen_name != "", ]
+#data <- data[data$retweeted_status.user.screen_name != "", ]
+data <- data[!is.na(data$retweeted_status.user.screen_name), ]
 
 #get the frequencies
 edgelist2 <- dplyr::summarise(dplyr::group_by(data,user.screen_name, retweeted_status.user.screen_name),count =n())
