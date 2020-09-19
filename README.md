@@ -2,6 +2,10 @@
 
 This repository contains random scripts. You can pick them up as you find them useful. For question, refer to the individual listed on the top.            
 
+### Note
+
+*Everything here is a work-in-progress. Please connect to member/s listed above your script to get further help! These are scripts, therefore they're non-interactable.*
+
 ## Contents
 * R (./R)
 	* **adjaceny_list_csv_maker** - Script for making csv file for gephi network visulization.        
@@ -18,16 +22,23 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **specific_column_csv_writer**- reads a csv, you can select columns based on one's need then writes with those columns.
 	* **Rclean_json_step2**- R script to replace *clean_json_step2.py*, because in some linux machine, Pandas is behaving strangely like shifting columns. If you're on windows, you can use this or *clean_json_step2.py.*
 	* **production_parellel**- R script to replace *clean_json_step1.py*, when the SLURM is being weird to us.
-	* **TPMOD_csv_makers**- upgraded version of *specific_column_csv_writer.R* written for topic-modeling people.
+	* **TPMOD_csv_makers**- upgraded version of *specific_column_csv_writer.R* written for topic-modeling people.    
+	* **tweet_text_entropy**- computes the entropy of tweets and measures the cosine similarty of tweets.    
+	* **pre_adjaceny_list_csv_step**- Vectorised version of combining tweet texts. Pretty fast.    
+	* **post_sentistren**- extension of sentistren.py. It's purpose is to create graph and do further analysis.    
+	* **only_in_fl**- gets the florida specific csvs only.   
+	* **dr_yu_ds** - makes a file Dr. Yu needs. It requires filtered csv files.   
+	* **dr_yu_mat**- makes a dfm() type matrix file for #tag frequency.       
 * python (./python)
 	* **populate_bot_files** - Script for collecting Botometer scores from an output.csv *(this file contains 1 col usernames)*       
 	* **username_cutter** - Reads all the csv files based on a column and returns a big csv. If you want to split that csv
 			    by # of rows, you can uncomment the last lines and do it that way too.  
-	* **text_file_gatherer** - Reads all the smaller USC twitter id texts files and combines them into one day.    
+	* **text_file_gatherer** - Reads all the smaller USC twitter id texts files and combines them into one day.     
 	* **clean_json_step1** - Re-dumps the jsonl files to remove extra EOFs, Reads a jsonl (or many jsonls through merging) from hydrator and remakes a twitter csv in utf-8 BOM format to preserve emojis. Use this on Hydrator files, if you are cleaning json files from twitter then know that full_text objects in script are actually only text in other json files from like Twitter.        
 	* **clean_json_step2** - Reads bunch of USC data and botscores we got, and make a 100K csv file with URL being replaced with the url's <title> tag.        
 	* **re_make_jsonl** - only works on jsonlines files. Remove all extra EOF from the files, and formats so every line has '\n' delimiter. 
 	* **500_rows_maker** - filters a dataframe based on queries.
 	* **replace_url_stripped** - A stripped down version of clean_json_step2.py, that only removes only removes the URL with <title> tag.
 	* **clean_standardize**- Formats jsonLines into proper json trees.
-	* **1mill_rows_maker**- Groups all the files in a folder, outputs 1 million rows csv file, then outputs files based on selected query.
+	* **1mill_rows_maker**- Groups all the files in a folder, outputs 1 million rows csv file, then outputs files based on selected query.     
+	* **sentistren**- Made to compute sentimental analysis using senstrength.jar software.    

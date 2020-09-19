@@ -1,5 +1,10 @@
-#For USF SAIL
-#~Mihir 
+# SAIL Labs
+# ~Mihir
+
+## Description:
+##-------------
+#* Remove duplicate tweetIDs from each text files from USC files.
+##-------------
 
 library(data.table)
 library(dplyr)

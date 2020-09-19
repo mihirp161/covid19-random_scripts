@@ -1,5 +1,10 @@
-# For USF SAIL
-# ~Wesley, Mihir
+# SAIL Labs
+# ~Mihir
+
+## Description:
+##-------------
+#* Splits huge csv into multiple parts based on n rows.
+##-------------
 
 # R method to make multiple csvs based on Rows.
 
@@ -17,3 +22,5 @@ for (i in seq_along(groups)) {
   write.csv(groups[[i]], paste0("bigdf_data_output_file", i, ".csv")) 
 }
 #Output: all the files will be in the current directory. 
+
+#EOF
