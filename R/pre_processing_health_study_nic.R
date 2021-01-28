@@ -1,0 +1,341 @@
+# SAIL Labs
+# ~Mihir
+
+## Description:
+##-------------
+#* This script does some pre-processing for Dr Nic's data for Health agencies' social engagement study.
+##-------------
+
+options(scipen = 9999)
+
+library(tidyverse)
+library(readxl)
+library(rio)
+library(lubridate)
+library(data.table)
+
+# rollback the directory
+go_back <- function(){
+  setwd("..")
+}
+
+# counts the duplicates based on columns
+count_dups <- function(tbl, column){
+  return(tbl %>% janitor::get_dupes(which(colnames(tbl)==column)) %>% dplyr::tally())
+}
+
+
+# returns a dataframe with all files combined
+tbl_maker <- function(main_dir, sub_dir, which_files, go_back_this_many, date_col_name){
+  
+  setwd(paste0("./", main_dir)) # set the directories
+  setwd(paste0("./", sub_dir))
+
+  files <- list.files(pattern = "*.csv$", recursive = TRUE) #get all csvs
+  files <- files[grepl(which_files, files)] #get filenames
+  tbl <- files %>% purrr::map_df(~read_csv(., col_types = cols(.default = "c"))) #merge files
+  tbl <- tbl[-1] #remove UNKNOWN column
+  tbl[ ,date_col_name] <- as.POSIXct(tbl[[date_col_name]],
+                                          format="%Y-%m-%d %H:%M:%S", tz = "GMT") #re-classify datatype to dates, twitter is in GMT
+
+  lapply(seq_len(go_back_this_many), function(x) go_back()) #run function n times
+  
+  return(tbl)
+}
+
+# removes duplicates from the dataframe
+remove_dups <- function(tbl, column){
+  
+  tbl <- tbl[-which(duplicated(tbl[ ,column])), ] #keep only unique items
+  tbl <- tbl[!is.na(tbl[ ,column]), ] #keep only the populated cells
+  
+  return(tbl)
+}
+
+
+# EST time for facebook
+date1_EST <- as.POSIXct("2020-01-01 00:00:00 EST") #lower bound
+date2_EST <- as.POSIXct("2020-12-31 23:59:59 EST") #upper bound
+
+rng_EST <- lubridate::interval(date1_EST, date2_EST) #desired range
+
+# GMT time for twitter
+date1_GMT <- as.POSIXct("2020-01-01 00:00:00 GMT") #lower bound
+date2_GMT <- as.POSIXct("2020-12-31 23:59:59 GMT") #upper bound
+
+rng_GMT <- lubridate::interval(date1_GMT, date2_GMT) #desired range
+
+
+#--------------------------------- Read CSV files at many levels ---------------------------------
+
+
+## TWITTER FILES
+
+# state level
+
+state_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected", 
+                                        sub_dir= "state_health_tweets_2020_12_07",
+                                        which_files= "tweet",
+                                        go_back_this_many= 2,
+                                        date_col_name= "created_at"), 
+                              tbl_maker(main_dir= "original-selected", 
+                                        sub_dir= "state_health_tweets_2021_01_07",
+                                        which_files= "tweet",
+                                        go_back_this_many= 2,
+                                        date_col_name= "created_at"))
+
+
+count_dups(state_tbl, "status_id")
+
+state_tbl <- remove_dups(state_tbl, "status_id")
+
+count_dups(state_tbl, "status_id")
+
+state_tbl <- state_tbl[state_tbl$created_at %within% rng_GMT, ]
+
+
+readr::write_csv(state_tbl, "state_health_tweets_2020.csv")
+
+
+# local level
+
+
+local_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected", 
+                                        sub_dir= "local_health_tweets_2020_12_14",
+                                        which_files= "tweet",
+                                        go_back_this_many= 2,
+                                        date_col_name= "created_at"), 
+                              tbl_maker(main_dir= "original-selected", 
+                                        sub_dir= "local_health_tweets_2021_01_07",
+                                        which_files= "tweet",
+                                        go_back_this_many= 2,
+                                        date_col_name= "created_at"))
+
+count_dups(local_tbl, "status_id")
+
+local_tbl <- remove_dups(local_tbl, "status_id")
+
+count_dups(local_tbl, "status_id")
+
+local_tbl <- local_tbl[local_tbl$created_at %within% rng_GMT, ]
+
+readr::write_csv(local_tbl, "local_health_tweets_2020.csv")
+
+
+# Federal level
+
+fed_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected", 
+                                        sub_dir= "fed_health_tweets_2020-2021",
+                                        which_files= "tweet",
+                                        go_back_this_many= 2,
+                                        date_col_name= "created_at"))
+
+count_dups(fed_tbl, "status_id")
+
+fed_tbl <- remove_dups(fed_tbl, "status_id")
+
+count_dups(fed_tbl, "status_id")
+
+fed_tbl <-  fed_tbl[fed_tbl$created_at %within% rng_GMT, ]
+
+
+readr::write_csv(fed_tbl, "federal_health_tweets_2020.csv")
+
+
+## FACEBOOK
+
+setwd(paste0("./", "original-selected"))
+
+# read the excel file, and move sheets into specific dataframes
+data_list <- rio::import_list("health_agencies_FB_posts_all.xlsx")
+
+state_tbl_fb <- data_list$`State Level Goverment`
+
+local_tbl_fb <-  data_list$`Local Level Governmnet`
+
+fed_tbl_fb <- data_list$`Federal Level Government`
+
+setwd('..')
+
+# Filter Facebbook time
+
+# Facebook times are in eastern times
+state_tbl_fb$Created <- as.POSIXct(state_tbl_fb$Created, format="%Y-%m-%d %H:%M:%S", tz = "America/New_York") 
+
+fed_tbl_fb$Created <- as.POSIXct(fed_tbl_fb$Created, format="%Y-%m-%d %H:%M:%S", tz = "America/New_York") 
+
+local_tbl_fb$Created <- as.POSIXct(local_tbl_fb$Created, format="%Y-%m-%d %H:%M:%S", tz = "America/New_York") 
+
+
+state_tbl_fb <- state_tbl_fb[state_tbl_fb$Created %within% rng_EST, ]
+
+local_tbl_fb <- local_tbl_fb[local_tbl_fb$Created %within% rng_EST, ]
+
+fed_tbl_fb <- fed_tbl_fb[fed_tbl_fb$Created %within% rng_EST, ]
+
+
+#create facebook files
+
+readr::write_csv(state_tbl_fb, "state_health_fb_2020.csv")
+readr::write_csv(fed_tbl_fb, "federal_health_fb_2020.csv")
+readr::write_csv(local_tbl_fb, "local_health_fb_2020.csv")
+
+
+# emotional egagement in facebook
+
+# sum positive and negative reactions and attach them
+attach_eng <- function(tbl){
+  
+  pos_cols <- c('Likes','Love','Care','Wow','Haha')
+  neg_cols <- c('Sad','Angry')
+  
+  tbl$positive_eng <- apply(tbl[ ,pos_cols],1,sum)
+  tbl$negative_eng <- apply(tbl[ ,neg_cols],1,sum)
+  
+  return(tbl)
+}
+
+# create engagement dataframes
+state_tbl_fb_eng <- attach_eng(state_tbl_fb) %>%
+                      dplyr::select(`User Name`, Created,
+                                    positive_eng, negative_eng) %>%
+                      dplyr::mutate_at(vars(Created), funs(as.Date))
+
+local_tbl_fb_eng <- attach_eng(local_tbl_fb)%>%
+                      dplyr::select(`User Name`, Created,
+                                    positive_eng, negative_eng) %>%
+                      dplyr::mutate_at(vars(Created), funs(as.Date))
+
+fed_tbl_fb_eng <- attach_eng(fed_tbl_fb)%>%
+                      dplyr::select(`User Name`, Created,
+                                    positive_eng, negative_eng) %>%
+                      dplyr::mutate_at(vars(Created), funs(as.Date))
+
+# get engagement per day
+state_tbl_fb_eng <- state_tbl_fb_eng %>%
+                      dplyr::group_by(`User Name`, Created) %>%
+                      dplyr::summarise_each(funs(sum))
+
+local_tbl_fb_eng <- local_tbl_fb_eng %>%
+                      dplyr::group_by(`User Name`, Created) %>%
+                      dplyr::summarise_each(funs(sum))
+
+fed_tbl_fb_eng <- fed_tbl_fb_eng %>%
+                      dplyr::group_by(`User Name`, Created) %>%
+                      dplyr::summarise_each(funs(sum))
+
+
+readr::write_csv(state_tbl_fb_eng, "state_health_fb_eng.csv")
+readr::write_csv(fed_tbl_fb_eng, "federal_health_fb_eng.csv")
+readr::write_csv(local_tbl_fb_eng, "local_health_fb_eng.csv")
+
+
+
+#------------------------------------- Fix time difference ------------------------------
+
+## TWITTER
+
+#federal agencies
+
+fed_tbl$corrected_time <-  fed_tbl$created_at - lubridate::hours(x= 5)
+
+#state health agencies
+setwd(paste0("./", "original-selected"))
+
+# read the health agencies file to get their time zones hours
+
+state_time_file <- readr::read_csv("state_health_agencies.csv")
+local_time_file <- readr::read_csv("local_health_agencies.csv")
+  
+setwd('..')
+
+#local health agencies
+
+#join state to state_tbl and local to local_tbl
+
+state_tbl <- state_tbl %>% left_join(state_time_file, by = c("screen_name" = "agency_twitter_handle"))
+
+local_tbl <- local_tbl %>% left_join(local_time_file, by = c("screen_name" = "agency_Twitter_handle"))
+
+# turn the values to positive vals
+state_tbl$gmt_difference <- abs(state_tbl$gmt_difference)
+local_tbl$gmt_difference <- abs(local_tbl$gmt_difference)
+
+# attach the fixed times to designated tables
+state_tbl$corrected_time <- state_tbl$created_at - lubridate::hours(x= state_tbl$gmt_difference)
+
+local_tbl$corrected_time <- local_tbl$created_at - lubridate::hours(x= local_tbl$gmt_difference)
+
+# write to the csvs
+readr::write_csv(state_tbl, "state_tweets_joined_timed.csv")
+readr::write_csv(fed_tbl, "federal_health_tweets_timed.csv")
+readr::write_csv(local_tbl, "local_tweets_joined_timed.csv")
+
+
+#---------------------------------- aggregation measures (for Twitter) ------------------------------
+
+state_tbl_cut <- state_tbl %>%
+                    dplyr::select(corrected_time, screen_name, name, favorite_count, retweet_count, agency_name,
+                                         state, state_code, gov_party, state_pop_2010) %>%
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
+
+
+local_tbl_cut <- local_tbl %>%
+                    dplyr::select(corrected_time, screen_name, name, favorite_count, retweet_count, agency_name,
+                                             state, state_code, city_gov_party_2020, city_pop)%>%
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
+
+
+fed_tbl_cut <- fed_tbl %>%
+                    dplyr::select(corrected_time, screen_name, name, favorite_count, retweet_count)%>%
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
+
+# federal level
+fed_tbl_complete <- fed_tbl_cut %>%
+                      dplyr::group_by(corrected_time, screen_name, name) %>%
+                      dplyr::summarise(daily_favorite_count = toString(favorite_count),
+                                                    daily_retweet_count = toString(retweet_count)) %>%
+                      dplyr::ungroup() %>% 
+                      tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
+                      dplyr::group_by(corrected_time, screen_name, name) %>% 
+                      dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                                daily_favorite_count = sum(daily_favorite_count),
+                                daily_retweet_count = sum(daily_retweet_count))
+
+# local level
+local_tbl_complete <- local_tbl_cut %>%
+                      dplyr::group_by(corrected_time, screen_name, name, agency_name,
+                                      state, state_code, city_gov_party_2020, city_pop) %>%
+                      dplyr::summarise(daily_favorite_count = toString(favorite_count),
+                                       daily_retweet_count = toString(retweet_count)) %>%
+                      dplyr::ungroup() %>% 
+                      tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
+                      dplyr::group_by(corrected_time, screen_name, name, agency_name,
+                                      state, state_code, city_gov_party_2020, city_pop) %>% 
+                      dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                                       daily_favorite_count = sum(daily_favorite_count),
+                                       daily_retweet_count = sum(daily_retweet_count))
+
+# state level
+state_tbl_complete <- state_tbl_cut %>%
+                         dplyr::group_by(corrected_time, screen_name, name, agency_name,
+                                         state, state_code, gov_party, state_pop_2010) %>%
+                         dplyr::summarise(daily_favorite_count = toString(favorite_count),
+                                          daily_retweet_count = toString(retweet_count)) %>%
+                         dplyr::ungroup() %>% 
+                         tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
+                         dplyr::group_by(corrected_time, screen_name, name, agency_name,
+                                         state, state_code, gov_party, state_pop_2010) %>% 
+                         dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                                          daily_favorite_count = sum(daily_favorite_count),
+                                          daily_retweet_count = sum(daily_retweet_count))
+
+#create new files
+readr::write_csv(state_tbl_complete, "state_tweets_daily_complete.csv")
+readr::write_csv(fed_tbl_complete, "federal_tweets_daily_complete.csv")
+readr::write_csv(local_tbl_complete, "local_tweets_daily_complete.csv")
+
+
+
+#---------------------------------- aggregation measures (for facebook) ------------------------------
+# Currently waiting on the file...
