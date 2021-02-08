@@ -147,13 +147,13 @@ readr::write_csv(fed_tbl, "federal_health_tweets_2020.csv")
 setwd(paste0("./", "original-selected"))
 
 # read the excel file, and move sheets into specific dataframes
-data_list <- rio::import_list("health_agencies_FB_posts_all.xlsx")
+data_list <- rio::import_list("Health_Related_Governmental_FB_Pages_withFollowerCount.xlsx")
 
-state_tbl_fb <- data_list$`State Level Goverment`
+state_tbl_fb <- data_list$`State Level`
 
-local_tbl_fb <-  data_list$`Local Level Governmnet`
+local_tbl_fb <-  data_list$`Local Level`
 
-fed_tbl_fb <- data_list$`Federal Level Government`
+fed_tbl_fb <- data_list$`Federal Level`
 
 setwd('..')
 
@@ -240,6 +240,7 @@ readr::write_csv(local_tbl_fb_eng, "local_health_fb_eng.csv")
 fed_tbl$corrected_time <-  fed_tbl$created_at - lubridate::hours(x= 5)
 
 #state health agencies
+#local health agencies
 setwd(paste0("./", "original-selected"))
 
 # read the health agencies file to get their time zones hours
@@ -249,7 +250,9 @@ local_time_file <- readr::read_csv("local_health_agencies.csv")
   
 setwd('..')
 
-#local health agencies
+# Check which elements don't match
+setdiff(factor(state_time_file$agency_twitter_handle), factor(state_tbl$screen_name))
+setdiff(factor(local_time_file$agency_Twitter_handle), factor(local_tbl$screen_name))
 
 #join state to state_tbl and local to local_tbl
 
@@ -336,6 +339,45 @@ readr::write_csv(fed_tbl_complete, "federal_tweets_daily_complete.csv")
 readr::write_csv(local_tbl_complete, "local_tweets_daily_complete.csv")
 
 
-
 #---------------------------------- aggregation measures (for facebook) ------------------------------
-# Currently waiting on the file...
+
+### FACEBOOK
+
+# fix federal file
+fed_tbl_fb_eng_timed <- fed_tbl_fb
+
+fed_tbl_fb_eng_timed$corrected_time <- fed_tbl_fb_eng_timed$Created - lubridate::hours(x= 5)
+
+#fix state file
+state_tbl_fb_eng_timed <- state_tbl_fb
+local_tbl_fb_eng_timed <- local_tbl_fb
+
+setwd(paste0("./", "original-selected"))
+
+# read the health agencies file to get their time zones hours
+
+state_time_file_fb <- readr::read_csv("state_health_agencies.csv")
+local_time_file_fb <- readr::read_csv("local_health_agencies.csv")
+
+setwd('..')
+
+# Check which elements don't match
+setdiff(factor(state_time_file$agency_twitter_handle), factor(state_tbl$screen_name))
+setdiff(factor(local_time_file$agency_Twitter_handle), factor(local_tbl$screen_name))
+
+#join state to state_tbl and local to local_tbl
+
+state_tbl_fb_eng_timed <- state_tbl_fb_eng_timed %>% 
+                            dplyr::left_join(state_time_file_fb, by = c("User Name" = "agency_fb_handle"))
+
+local_tbl_fb_eng_timed <- local_tbl_fb_eng_timed %>% 
+                            dplyr::left_join(local_time_file_fb, by = c("User Name" = "agency_FB_handle"))
+
+# turn the values to positive vals
+state_tbl_fb_eng_timed$gmt_difference <- abs(state_tbl_fb_eng_timed$gmt_difference)
+local_tbl_fb_eng_timed$gmt_difference <- abs(local_tbl_fb_eng_timed$gmt_difference)
+
+# attach the fixed times to designated tables
+state_tbl_fb_eng_timed$corrected_time <- state_tbl_fb_eng_timed$created_at - lubridate::hours(x= state_tbl_fb_eng_timed$gmt_difference)
+
+local_tbl_fb_eng_timed$corrected_time <- local_tbl_fb_eng_timed$created_at - lubridate::hours(x= local_tbl_fb_eng_timed$gmt_difference)
