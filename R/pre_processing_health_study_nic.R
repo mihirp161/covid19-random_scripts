@@ -235,30 +235,37 @@ readr::write_csv(local_tbl_fb_eng, "local_health_fb_eng.csv")
 
 ## TWITTER
 
-#federal agencies
-
-fed_tbl$corrected_time <-  fed_tbl$created_at - lubridate::hours(x= 5)
-
 #state health agencies
 #local health agencies
 setwd(paste0("./", "original-selected"))
 
 # read the health agencies file to get their time zones hours
 
-state_time_file <- readr::read_csv("state_health_agencies.csv")
-local_time_file <- readr::read_csv("local_health_agencies.csv")
+state_time_file <- readr::read_csv("state_health_agencies.csv") %>% 
+                      dplyr::mutate(agency_twitter_handle= tolower(agency_twitter_handle),
+                                    agency_fb_handle = tolower(agency_fb_handle))
+
+local_time_file <- readr::read_csv("local_health_agencies.csv") %>% 
+                      dplyr::mutate(agency_Twitter_handle= tolower(agency_Twitter_handle),
+                                    agency_FB_handle = tolower(agency_FB_handle))
   
 setwd('..')
 
-# Check which elements don't match
+#join state to state_tbl and local to local_tbl
+
+state_tbl <- state_tbl %>% dplyr::mutate(screen_name = tolower(screen_name)) %>%
+                dplyr::left_join(state_time_file, by = c("screen_name" = "agency_twitter_handle"))
+
+local_tbl <- local_tbl %>% dplyr::mutate(screen_name = tolower(screen_name)) %>%
+                dplyr::left_join(local_time_file, by = c("screen_name" = "agency_Twitter_handle"))
+
+
+# Check which elements didn't match
 setdiff(factor(state_time_file$agency_twitter_handle), factor(state_tbl$screen_name))
 setdiff(factor(local_time_file$agency_Twitter_handle), factor(local_tbl$screen_name))
 
-#join state to state_tbl and local to local_tbl
-
-state_tbl <- state_tbl %>% left_join(state_time_file, by = c("screen_name" = "agency_twitter_handle"))
-
-local_tbl <- local_tbl %>% left_join(local_time_file, by = c("screen_name" = "agency_Twitter_handle"))
+# fix federal agencies
+fed_tbl$corrected_time <-  fed_tbl$created_at - lubridate::hours(x= 5)
 
 # turn the values to positive vals
 state_tbl$gmt_difference <- abs(state_tbl$gmt_difference)
@@ -339,39 +346,29 @@ readr::write_csv(fed_tbl_complete, "federal_tweets_daily_complete.csv")
 readr::write_csv(local_tbl_complete, "local_tweets_daily_complete.csv")
 
 
-#---------------------------------- aggregation measures (for facebook) ------------------------------
+#---------------------------------- aggregation measures (For FACEBOOK) ------------------------------
 
 ### FACEBOOK
 
-# fix federal file
+# duplicate federal, local, and state file
 fed_tbl_fb_eng_timed <- fed_tbl_fb
-
-fed_tbl_fb_eng_timed$corrected_time <- fed_tbl_fb_eng_timed$Created - lubridate::hours(x= 5)
-
-#fix state file
 state_tbl_fb_eng_timed <- state_tbl_fb
 local_tbl_fb_eng_timed <- local_tbl_fb
 
-setwd(paste0("./", "original-selected"))
-
-# read the health agencies file to get their time zones hours
-
-state_time_file_fb <- readr::read_csv("state_health_agencies.csv")
-local_time_file_fb <- readr::read_csv("local_health_agencies.csv")
-
-setwd('..')
-
-# Check which elements don't match
-setdiff(factor(state_time_file$agency_twitter_handle), factor(state_tbl$screen_name))
-setdiff(factor(local_time_file$agency_Twitter_handle), factor(local_tbl$screen_name))
-
 #join state to state_tbl and local to local_tbl
 
-state_tbl_fb_eng_timed <- state_tbl_fb_eng_timed %>% 
-                            dplyr::left_join(state_time_file_fb, by = c("User Name" = "agency_fb_handle"))
+state_tbl_fb_eng_timed <- state_tbl_fb_eng_timed %>% dplyr::mutate(`User Name` = tolower(`User Name`)) %>%
+                            dplyr::left_join(state_time_file, by = c("User Name" = "agency_fb_handle"))
 
-local_tbl_fb_eng_timed <- local_tbl_fb_eng_timed %>% 
-                            dplyr::left_join(local_time_file_fb, by = c("User Name" = "agency_FB_handle"))
+local_tbl_fb_eng_timed <- local_tbl_fb_eng_timed %>% dplyr::mutate(`User Name` = tolower(`User Name`)) %>% 
+                            dplyr::left_join(local_time_file, by = c("User Name" = "agency_FB_handle"))
+
+# Check which elements don't match
+setdiff(factor(state_time_file$agency_fb_handle), factor(state_tbl_fb_eng_timed$`User Name`))
+setdiff(factor(local_time_file$agency_FB_handle), factor(local_tbl_fb_eng_timed$`User Name`))
+
+# fix the federal hours
+fed_tbl_fb_eng_timed$corrected_time <- fed_tbl_fb_eng_timed$Created - lubridate::hours(x= 5)
 
 # turn the values to positive vals
 state_tbl_fb_eng_timed$gmt_difference <- abs(state_tbl_fb_eng_timed$gmt_difference)
