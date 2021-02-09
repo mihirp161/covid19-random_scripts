@@ -254,7 +254,6 @@ local_time_file <- readr::read_csv("local_health_agencies.csv") %>%
   
 setwd('..')
 
-
 #join state to state_tbl and local to local_tbl
 
 state_tbl <- state_tbl %>% dplyr::mutate(screen_name = tolower(screen_name)) %>%
@@ -361,6 +360,7 @@ readr::write_csv(state_tbl_complete, "state_tweets_daily_complete.csv")
 readr::write_csv(fed_tbl_complete, "federal_tweets_daily_complete.csv")
 readr::write_csv(local_tbl_complete, "local_tweets_daily_complete.csv")
 
+
 #---------------------------------- Fix the time difference (For FACEBOOK) ------------------------------
 
 ### FACEBOOK
@@ -389,15 +389,12 @@ fed_tbl_fb_eng_timed$corrected_time <- fed_tbl_fb_eng_timed$Created - lubridate:
 state_tbl_fb_eng_timed <- remove_rows_missing_on_column(state_tbl_fb_eng_timed, c("gmt_difference"))
 local_tbl_fb_eng_timed <- remove_rows_missing_on_column(local_tbl_fb_eng_timed, c("gmt_difference"))
 
-#---------------------------------- aggregation measures (for facebook) ------------------------------
-
 
 # turn the values to positive vals
 state_tbl_fb_eng_timed$gmt_difference <- abs(state_tbl_fb_eng_timed$gmt_difference)
 local_tbl_fb_eng_timed$gmt_difference <- abs(local_tbl_fb_eng_timed$gmt_difference)
 
 # attach the fixed times to designated tables
-
 state_tbl_fb_eng_timed$corrected_time <- state_tbl_fb_eng_timed$Created - lubridate::hours(x= state_tbl_fb_eng_timed$gmt_difference)
 
 local_tbl_fb_eng_timed$corrected_time <- local_tbl_fb_eng_timed$Created - lubridate::hours(x= local_tbl_fb_eng_timed$gmt_difference)
@@ -551,5 +548,7 @@ jhu_covid_data_fed_51 <- jhu_covid_data_state_cut %>%
                                            total_deaths = sum(total_deaths))
 
 readr::write_csv(jhu_covid_data_fed_51, "federal_covid_incidence_2020.csv")
+
+
 
 #### Awaiting next steps...
