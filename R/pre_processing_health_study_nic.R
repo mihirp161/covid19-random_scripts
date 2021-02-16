@@ -58,13 +58,13 @@ remove_dups <- function(tbl, column){
 
 # EST time for facebook
 date1_EST <- as.POSIXct("2020-01-01 00:00:00 EST") #lower bound
-date2_EST <- as.POSIXct("2020-12-31 23:59:59 EST") #upper bound
+date2_EST <- as.POSIXct("2021-01-01 00:00:00 EST") #upper bound
 
 rng_EST <- lubridate::interval(date1_EST, date2_EST) #desired range
 
 # GMT time for twitter
 date1_GMT <- as.POSIXct("2020-01-01 00:00:00 GMT") #lower bound
-date2_GMT <- as.POSIXct("2020-12-31 23:59:59 GMT") #upper bound
+date2_GMT <- as.POSIXct("2021-01-01 00:00:00 GMT") #upper bound
 
 rng_GMT <- lubridate::interval(date1_GMT, date2_GMT) #desired range
 
@@ -307,7 +307,7 @@ state_tbl_cut <- state_tbl %>%
 
 local_tbl_cut <- local_tbl %>%
                     dplyr::select(corrected_time, screen_name, name, favorite_count, retweet_count, agency_name,
-                                             state, state_code, city_gov_party_2020, city_pop)%>%
+                                  state, city_gov_party_2020, city_pop, most_pop_city, county, state_gov_party)%>%
                     dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 
@@ -330,13 +330,13 @@ fed_tbl_complete <- fed_tbl_cut %>%
 # local level
 local_tbl_complete <- local_tbl_cut %>%
                       dplyr::group_by(corrected_time, screen_name, name, agency_name,
-                                      state, state_code, city_gov_party_2020, city_pop) %>%
+                                      state, county, state_gov_party, most_pop_city, city_gov_party_2020, city_pop) %>%
                       dplyr::summarise(daily_favorite_count = toString(favorite_count),
                                        daily_retweet_count = toString(retweet_count)) %>%
                       dplyr::ungroup() %>% 
                       tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
                       dplyr::group_by(corrected_time, screen_name, name, agency_name,
-                                      state, state_code, city_gov_party_2020, city_pop) %>% 
+                                      state,county, state_gov_party, most_pop_city, city_gov_party_2020, city_pop) %>% 
                       dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
                                        daily_favorite_count = sum(daily_favorite_count),
                                        daily_retweet_count = sum(daily_retweet_count))
@@ -422,8 +422,8 @@ local_tbl_fb_cut <- local_tbl_fb_eng_timed %>%
                                   Likes, Love, Care, Wow, Haha,
                                   Sad, Angry, 
                                   `Total Interactions`, Comments, Shares, 
-                                  state_code, city_gov_party_2020,
-                                  city_pop, level)%>%
+                                   city_gov_party_2020,
+                                  city_pop, level, most_pop_city, county, state_gov_party)%>%
                     dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 
@@ -459,7 +459,7 @@ fed_tbl_complete_fb <- fed_tbl_fb_cut %>%
 local_tbl_complete_fb <- local_tbl_fb_cut %>%
                         attach_eng() %>%
                         dplyr::group_by(corrected_time, `User Name`, `Page Name`, 
-                                        state_code, city_gov_party_2020,
+                                        most_pop_city, county, state_gov_party, city_gov_party_2020,
                                         city_pop, level) %>%
                         dplyr::summarise(daily_positive_eng = toString(positive_eng),
                                          daily_negative_eng = toString(negative_eng),
@@ -470,7 +470,7 @@ local_tbl_complete_fb <- local_tbl_fb_cut %>%
                         tidyr::separate_rows(daily_positive_eng, daily_negative_eng, daily_total_interactions,
                                              daily_comments, daily_shares, convert = TRUE) %>% 
                         dplyr::group_by(corrected_time, `User Name`, `Page Name`, 
-                                        state_code, city_gov_party_2020,
+                                        most_pop_city, county, state_gov_party, city_gov_party_2020,
                                         city_pop, level) %>% 
                         dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_shares),
                                          daily_positive_eng = sum(daily_positive_eng),
@@ -524,7 +524,7 @@ DATE1 <- as.Date("2020-01-01")
 DATE2 <- as.Date("2020-12-31")
 
 jhu_covid_data_state_cut <- jhu_covid_data_state_cut%>%
-                              dplyr::filter(Last_Update > DATE1 & Last_Update < DATE2)
+                              dplyr::filter(Last_Update >= DATE1 & Last_Update <= DATE2)
 
 
 jhu_covid_data_state_51 <- jhu_covid_data_state_cut %>%
@@ -551,4 +551,82 @@ readr::write_csv(jhu_covid_data_fed_51, "federal_covid_incidence_2020.csv")
 
 
 
-#### Awaiting next steps...
+# Local incidence 
+
+# read all the necessary data files
+setwd(paste0("./", "original-selected"))
+
+counties <- readr::read_csv("counties_of_interest.csv")
+
+setwd("..")
+
+setwd(paste0("./", "original-selected"))
+setwd(paste0("./", "JHU_covid_data_county"))
+
+jhu_confirmed <- readr::read_csv("time_series_covid19_confirmed_US.csv")
+jhu_death <- readr::read_csv("time_series_covid19_deaths_US.csv")
+
+setwd("..")
+
+setwd(paste0("./", "JHU_covid_data_state"))
+
+filenames <- list.files(pattern="*.csv", full.names=TRUE)
+jhu_data_state <- lapply(filenames, readr::read_csv)
+
+setwd("..")
+
+# swap the columns in dataframe
+
+counties <- counties[ ,c(2,1)]
+
+# create a column marking counties values
+counties['marker'] <- 1
+
+# join the two, keeping all of JHU's indices
+jhu_confirmed_filtered <- dplyr::left_join(jhu_confirmed, counties, 
+                                           by= c("Admin2" = "county", "Province_State" = "state")) %>%
+                          tidyr::drop_na(marker) %>%
+                          dplyr::select(-marker)     
+
+jhu_death_filtered <- dplyr::left_join(jhu_death, counties, 
+                                           by= c("Admin2" = "county", "Province_State" = "state")) %>%
+                          tidyr::drop_na(marker) %>%
+                          dplyr::select(-marker)                
+
+
+# spread the data so all the dates become rows and rest become columns
+library(reshape2)
+
+# here we are changing the names to something proper
+jhu_death_filtered <- dplyr::rename(jhu_death_filtered,
+                          c("county"= "Admin2", "state" = "Province_State"))
+
+jhu_confirmed_filtered <-  dplyr::rename(jhu_confirmed_filtered,
+                                         c("county"= "Admin2", "state" = "Province_State"))
+
+# melt death df
+jhu_death_filtered_inci <- reshape2::melt(jhu_death_filtered %>%
+                           dplyr::select(
+                             -"UID",-"iso2",-"iso3",-"code3",-"FIPS",
+                             -"Country_Region",-"Lat",-"Long_",-"Combined_Key",-"Population"
+                           ), id.vars=c("county","state"))%>%
+                          dplyr::rename("date"="variable" , "deaths"= "value" ) %>%
+                          dplyr::group_by(county, state, date) %>%
+                          dplyr::summarise(deaths= sum(deaths))
+
+# melt confirmed df
+jhu_confirmed_filtered_inci <- reshape2::melt(jhu_confirmed_filtered %>%
+                                            dplyr::select(
+                                              -"UID",-"iso2",-"iso3",-"code3",-"FIPS",
+                                              -"Country_Region",-"Lat",-"Long_",-"Combined_Key"
+                                            ), id.vars=c("county","state"))%>%
+                              dplyr::rename("date"="variable" , "confirmed"= "value" ) %>%
+                              dplyr::group_by(county, state, date) %>%
+                              dplyr::summarise(confirmed= sum(confirmed))
+
+# join the deaths and confirmed table
+combined_local_inci <- dplyr::left_join(jhu_confirmed_filtered_inci, jhu_death_filtered_inci,
+                                        by= c("county", "state", "date"))
+
+#change the date column to POSIXCT
+combined_local_inci$date <- lubridate::mdy(combined_local_inci$date)
