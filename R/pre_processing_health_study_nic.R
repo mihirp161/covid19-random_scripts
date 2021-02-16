@@ -574,7 +574,7 @@ filenames <- list.files(pattern="*.csv", full.names=TRUE)
 jhu_data_state <- lapply(filenames, readr::read_csv)
 
 setwd("..")
-
+setwd("..")
 # swap the columns in dataframe
 
 counties <- counties[ ,c(2,1)]
@@ -630,3 +630,12 @@ combined_local_inci <- dplyr::left_join(jhu_confirmed_filtered_inci, jhu_death_f
 
 #change the date column to POSIXCT
 combined_local_inci$date <- lubridate::mdy(combined_local_inci$date)
+
+# cut the dataframe to 2020 only
+combined_local_inci <- combined_local_inci%>%
+                        dplyr::filter(date >= DATE1 & date <= DATE2)
+
+#write to file
+readr::write_csv(combined_local_inci, "local_covid_incidence_2020.csv")
+
+
