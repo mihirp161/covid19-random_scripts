@@ -550,7 +550,6 @@ jhu_covid_data_fed_51 <- jhu_covid_data_state_cut %>%
 readr::write_csv(jhu_covid_data_fed_51, "federal_covid_incidence_2020.csv")
 
 
-
 # Local incidence 
 
 # read all the necessary data files
@@ -639,3 +638,59 @@ combined_local_inci <- combined_local_inci%>%
 readr::write_csv(combined_local_inci, "local_covid_incidence_2020.csv")
 
 
+#----------------------------------- Doing more with incidence data ----------------------------
+
+# join the state complete tweets with state incidence
+state_covid_2020 <- dplyr::inner_join(state_tbl_complete, jhu_covid_data_state_51, by= c("corrected_time" = "Last_Update",
+                                                                                         "state" = "Province_State"))
+
+readr::write_csv(state_covid_2020, "state_tweets_covid_2020.csv")
+
+# join facebook complete file with state incidence
+state_covid_2020_fb <- dplyr::inner_join(state_tbl_complete_fb, jhu_covid_data_state_51, by= c("corrected_time" = "Last_Update",
+                                                                                         "state" = "Province_State"))
+
+readr::write_csv(state_covid_2020_fb, "state_fb_covid_2020.csv")
+
+# join the federal fields
+
+fed_covid_2020 <- dplyr::inner_join(fed_tbl_complete, jhu_covid_data_fed_51, by= c("corrected_time" = "Last_Update"))
+
+readr::write_csv(fed_covid_2020, "federal_tweets_covid_2020.csv")
+
+fed_covid_2020_fb <- dplyr::inner_join(fed_tbl_complete_fb, jhu_covid_data_fed_51, by= c("corrected_time" = "Last_Update"))
+
+readr::write_csv(fed_covid_2020_fb, "federal_fb_covid_2020.csv")
+
+
+# compress the local incidence file
+compressed_local <- combined_local_inci %>%
+                    dplyr::group_by(state, date) %>%
+                    dplyr::summarize(county = stringr::str_c(county, collapse = ", "),
+                                  confirmed= sum(confirmed),
+                                  deaths= sum(deaths))
+
+# check which rows have counties seperated by commas so you can compress them to a single county
+View(compressed_local %>%
+      dplyr::filter_all(dplyr::any_vars(grepl(',', .))))
+
+# reduced all New York counties to New york only
+compressed_local$county <- ifelse(grepl(',', compressed_local$county), "New York",  compressed_local$county)
+
+readr::write_csv(compressed_local, "local_covid_incidence_2020_corrected.csv")
+
+# check which rows have counties seperated by commas so you can compress them to a single county
+
+local_covid_2020 <- dplyr::inner_join(local_tbl_complete, compressed_local, by= c("corrected_time" = "date",
+                                                                                    "county" = "county")) %>%
+                    dplyr::select(-state.y) %>%
+                    dplyr::rename("state" = "state.x")
+            
+readr::write_csv(local_covid_2020, "local_tweets_covid_2020.csv")
+
+# finally make a local facebook couty file
+
+local_covid_2020_fb <- dplyr::inner_join(local_tbl_complete_fb, compressed_local, by= c("corrected_time" = "date",
+                                                                                  "county" = "county"))
+
+readr::write_csv(local_covid_2020_fb, "local_fb_covid_2020.csv")
