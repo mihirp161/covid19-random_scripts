@@ -694,3 +694,69 @@ local_covid_2020_fb <- dplyr::inner_join(local_tbl_complete_fb, compressed_local
                                                                                   "county" = "county"))
 
 readr::write_csv(local_covid_2020_fb, "local_fb_covid_2020.csv")
+
+#----------------------------------------- final steps -----------------------------------------
+
+# Creating state tweets/fb and covid file for early 2020
+setwd(paste0("./", "original-selected"))
+setwd(paste0("./", "JHU_covid_data_county"))
+
+ts_cov19_confirmed <- readr::read_csv("time_series_covid19_confirmed_US.csv") %>% 
+                        dplyr::rename(c("county"= "Admin2", "state" = "Province_State"))
+
+# melt all confirmed and death cases and group them by cases and date and sum them
+ts_cov19_confirmed <- reshape2::melt(ts_cov19_confirmed %>%
+                             dplyr::select(
+                               -"UID",-"iso2",-"iso3",-"code3",-"FIPS",
+                               -"Country_Region",-"Lat",-"Long_",-"Combined_Key"
+                             ), id.vars=c("county","state"))%>%
+                      dplyr::rename("date"="variable" , "confirmed"= "value" ) %>%
+                      #dplyr::mutate(date= lubridate::mdy(date)) %>%
+                      dplyr::group_by(state, date) %>%
+                      dplyr::summarise(confirmed= sum(confirmed))
+
+ts_cov19_deaths <- readr::read_csv("time_series_covid19_deaths_US.csv") %>% 
+                      dplyr::rename(c("county"= "Admin2", "state" = "Province_State"))
+
+ts_cov19_deaths <- reshape2::melt(ts_cov19_deaths %>%
+                                    dplyr::select(
+                                      -"UID",-"iso2",-"iso3",-"code3",-"FIPS",
+                                      -"Country_Region",-"Lat",-"Long_",-"Combined_Key",-"Population"
+                                    ), id.vars=c("county","state"))%>%
+                    dplyr::rename("date"="variable" , "deaths"= "value" ) %>%
+                    dplyr::group_by(state, date) %>%
+                    dplyr::summarise(deaths= sum(deaths))
+
+DATE1 <- as.Date("2020-01-22")
+DATE2 <- as.Date("2020-05-01")
+
+ts_cov19_confirmed <- ts_cov19_confirmed %>%
+                        dplyr::mutate(date= lubridate::mdy(date)) %>%
+                        dplyr::filter(date >= DATE1 & date <= DATE2)
+
+
+ts_cov19_deaths <- ts_cov19_deaths %>%
+                        dplyr::mutate(date= lubridate::mdy(date)) %>%
+                        dplyr::filter(date >= DATE1 & date <= DATE2)
+
+ts_state_2020 <- dplyr::inner_join(ts_cov19_confirmed, ts_cov19_deaths, by= c("state" = "state",
+                                                                              "date" = "date"))
+
+
+setwd("..")
+setwd("..")
+
+readr::write_csv(ts_state_2020, "state_covid_incidence_early2020_test.csv")
+
+
+# Creating federal tweets/fb and covid file for early 2020
+
+current_df <- ts_state_2020 %>%
+                dplyr::select(-state) %>%
+                dplyr::group_by(date) %>%
+                dplyr::summarise(deaths = sum(deaths), 
+                                 confirmed = sum(confirmed))
+  
+  
+  
+  
