@@ -516,6 +516,9 @@ jhu_covid_data_state <- tbl_maker(main_dir= "original-selected",
                                   date_col_name= "Last_Update",
                                   remove_unknown = FALSE)
 
+
+jhu_covid_data_state <- jhu_covid_data_state[tolower(jhu_covid_data_state$Province_State) != "recovered", ]
+
 jhu_covid_data_state_cut <- jhu_covid_data_state %>%
                               dplyr::select(Last_Update, Province_State, Confirmed, Deaths)%>%
                               dplyr::mutate_at(vars(Last_Update), funs(as.Date))
@@ -530,7 +533,9 @@ jhu_covid_data_state_cut <- jhu_covid_data_state_cut%>%
 jhu_covid_data_state_51 <- jhu_covid_data_state_cut %>%
                              dplyr::group_by(Last_Update, Province_State) %>%
                              dplyr::summarise(total_confirmed = toString(Confirmed),
-                                              total_deaths = toString(Deaths))
+                                              total_deaths = toString(Deaths)) %>%
+                             dplyr::ungroup()%>%
+                             tidyr::separate_rows(total_confirmed, total_deaths, convert = TRUE)
   
 readr::write_csv(jhu_covid_data_state_51, "state_covid_incidence_2020.csv")
 
@@ -711,7 +716,7 @@ ts_cov19_confirmed <- reshape2::melt(ts_cov19_confirmed %>%
                                -"Country_Region",-"Lat",-"Long_",-"Combined_Key"
                              ), id.vars=c("county","state"))%>%
                       dplyr::rename("date"="variable" , "confirmed"= "value" ) %>%
-                      #dplyr::mutate(date= lubridate::mdy(date)) %>%
+                      dplyr::mutate(date= lubridate::mdy(date)) %>%
                       dplyr::group_by(state, date) %>%
                       dplyr::summarise(confirmed= sum(confirmed))
 
@@ -724,6 +729,7 @@ ts_cov19_deaths <- reshape2::melt(ts_cov19_deaths %>%
                                       -"Country_Region",-"Lat",-"Long_",-"Combined_Key",-"Population"
                                     ), id.vars=c("county","state"))%>%
                     dplyr::rename("date"="variable" , "deaths"= "value" ) %>%
+                    dplyr::mutate(date= lubridate::mdy(date)) %>%
                     dplyr::group_by(state, date) %>%
                     dplyr::summarise(deaths= sum(deaths))
 
@@ -731,12 +737,12 @@ DATE1 <- as.Date("2020-01-22")
 DATE2 <- as.Date("2020-05-01")
 
 ts_cov19_confirmed <- ts_cov19_confirmed %>%
-                        dplyr::mutate(date= lubridate::mdy(date)) %>%
+                        #dplyr::mutate(date= lubridate::mdy(date)) %>%
                         dplyr::filter(date >= DATE1 & date <= DATE2)
 
 
 ts_cov19_deaths <- ts_cov19_deaths %>%
-                        dplyr::mutate(date= lubridate::mdy(date)) %>%
+                        #dplyr::mutate(date= lubridate::mdy(date)) %>%
                         dplyr::filter(date >= DATE1 & date <= DATE2)
 
 ts_state_2020 <- dplyr::inner_join(ts_cov19_confirmed, ts_cov19_deaths, by= c("state" = "state",
@@ -749,14 +755,215 @@ setwd("..")
 readr::write_csv(ts_state_2020, "state_covid_incidence_early2020_test.csv")
 
 
+#-------------------------------------Compare the JHU figures -------------------------------------
+
+# full join the JHU dataset to JHU county dataset for record purpose
+DATE1 <- as.Date("2020-04-12")
+DATE2 <- as.Date("2020-05-01")  
+  
+tsts_state_2020_CUT <- ts_state_2020 %>%
+                        dplyr::filter(date >= DATE1 & date <= DATE2)%>%
+                        dplyr::rename("confirmed_JHU_covid_data_county" = "confirmed",
+                                      "deaths_JHU_covid_data_county" = "deaths")
+
+
+jhu_covid_data_state_51_CUT <- jhu_covid_data_state_51 %>%
+                                  dplyr::filter(Last_Update >= DATE1 & Last_Update <= DATE2) %>%
+                                  dplyr::rename("confirmed_JHU_covid_data_state" = "total_confirmed",
+                                                "deaths_JHU_covid_data_state" = "total_deaths")
+
+x <- dplyr::left_join(tsts_state_2020_CUT, jhu_covid_data_state_51_CUT, by= c("state" = "Province_State",
+                                                                              "date" = "Last_Update"))
+
+readr::write_csv(x, "comparing_JHU_figures_4_12to5_01.csv")
+
+#--------------------------------------------Green font --------------------------------------------
+
+# now keep only the matches rows between state incidence and county from Jan 22 to May 1
+
+DATE1 <- as.Date("2020-01-22")
+DATE2 <- as.Date("2020-05-01")
+
+tsts_state_2020_jan22_may1 <- ts_state_2020 %>%
+                                  dplyr::filter(date >= DATE1 & date <= DATE2)
+
+jhu_covid_data_state_51_jan22_may1  <- jhu_covid_data_state_51 %>%
+                                          dplyr::filter(Last_Update >= DATE1 & Last_Update <= DATE2)
+
+
+unmatched_entries_state <- dplyr::anti_join(tsts_state_2020_jan22_may1, jhu_covid_data_state_51_jan22_may1,
+                                            by= c("state" = "Province_State",
+                                                  "date" = "Last_Update",
+                                                  "confirmed" = "total_confirmed",
+                                                  "deaths" = "total_deaths"))
+
+
+readr::write_csv(unmatched_entries_state, "state_covid_incidence_early2020.csv")
+
+
+#------------------------------------------------Sky Blue font ---------------------------------
+
+# join county data from Jan 22 to May 1 with daily tweets
+
+state_tbl_complete_51_jan22_may1 <- state_tbl_complete
+
+# state_tbl_complete_51_jan22_may1 <- state_tbl_complete %>%
+#                                           dplyr::filter(corrected_time >= DATE1 & corrected_time <= DATE2)
+
+matched_entries_state <- dplyr::inner_join(unmatched_entries_state, state_tbl_complete_51_jan22_may1,
+                                                by= c("state" = "state",
+                                                      "date" = "corrected_time"))
+
+
+readr::write_csv(matched_entries_state, "state_tweets_covid_early2020.csv")
+
+#-------------------------------------------------Orange font ---------------------------------
+
+# join county data from Jan 22 to May 1 with daily facebook post
+
+state_tbl_complete_51_jan22_may1_fb <- state_tbl_complete_fb
+
+# state_tbl_complete_51_jan22_may1_fb <- state_tbl_complete_fb %>%
+#                                       dplyr::filter(corrected_time >= DATE1 & corrected_time <= DATE2)
+
+matched_entries_state_fb <- dplyr::inner_join(unmatched_entries_state, state_tbl_complete_51_jan22_may1_fb,
+                                              by= c("state" = "state",
+                                                    "date" = "corrected_time"))
+
+readr::write_csv(matched_entries_state_fb, "state_fb_covid_early2020.csv")
+
+#------------------------------------------------- purple font -----------------------------------------
+
+# Join state_tweets_covid_early2020 with state_tweets_covid_2020
+
+matched_entries_state <- matched_entries_state %>%
+                            dplyr::rename("total_confirmed" = "confirmed",
+                                          "total_deaths" = "deaths",
+                                          "corrected_time" = "date") %>%
+                            dplyr::select(corrected_time, screen_name, name, agency_name,
+                                          state, state_code, gov_party, state_pop_2010, total_daily_posts,
+                                          daily_favorite_count, daily_retweet_count, total_confirmed, 
+                                          total_deaths)
+
+state_tweets_covid_full2020 <- dplyr::bind_rows(matched_entries_state, state_covid_2020) %>% 
+                                  dplyr::distinct(corrected_time, state,  .keep_all = T)
+
+readr::write_csv(state_tweets_covid_full2020, "state_tweets_covid_full2020.csv")
+
+#--------------------------------------------- Red font -------------------------------------------
+
+# Join state_tweets_covid_early2020 with state_fb_covid_2020
+
+matched_entries_state_fb <- matched_entries_state_fb %>%
+                              dplyr::rename("total_confirmed" = "confirmed",
+                                            "total_deaths" = "deaths",
+                                            "corrected_time" = "date") %>%
+                              dplyr::select(corrected_time, `User Name`, `Page Name`, state,
+                                        state_code, gov_party, state_pop_2010, total_daily_posts,
+                                        daily_positive_eng, daily_negative_eng, daily_total_interactions, 
+                                        daily_comments, daily_shares, total_confirmed, total_deaths)
+
+
+state_tweets_covid_full2020_fb<- dplyr::bind_rows(matched_entries_state_fb, state_covid_2020_fb) %>% 
+                                    dplyr::distinct(corrected_time, state,  .keep_all = T)
+
+readr::write_csv(state_tweets_covid_full2020_fb, "state_fb_covid_full2020.csv")
+
+
+#---------------------------------------------------Green font OK OK OK ----------------------------------
+
+# reapeating the sames steps. We can create functions too, but I just want to finish this. Sigh.
+
 # Creating federal tweets/fb and covid file for early 2020
 
-current_df <- ts_state_2020 %>%
-                dplyr::select(-state) %>%
-                dplyr::group_by(date) %>%
-                dplyr::summarise(deaths = sum(deaths), 
-                                 confirmed = sum(confirmed))
-  
-  
-  
-  
+ts_state_2020 <- ts_state_2020 %>%
+                    dplyr::select(-state) %>%
+                    dplyr::group_by(date) %>%
+                    dplyr::summarise(deaths = sum(deaths), 
+                                     confirmed = sum(confirmed))
+
+# now keep only the matches rows between federal incidence and county from Jan 22 to May 1
+
+DATE1 <- as.Date("2020-01-22")
+DATE2 <- as.Date("2020-05-01")
+
+tsts_state_2020_jan22_may1_fed <- ts_state_2020 %>%
+                                dplyr::filter(date >= DATE1 & date <= DATE2)
+
+jhu_covid_data_state_51_jan22_may1_fed  <- jhu_covid_data_fed_51 %>%
+                                            dplyr::filter(Last_Update >= DATE1 & Last_Update <= DATE2)
+
+
+unmatched_entries_state_fed <- dplyr::anti_join(tsts_state_2020_jan22_may1_fed, jhu_covid_data_state_51_jan22_may1_fed,
+                                            by= c("date" = "Last_Update",
+                                                  "confirmed" = "total_confirmed",
+                                                  "deaths" = "total_deaths"))
+
+
+readr::write_csv(unmatched_entries_state_fed, "federal_covid_incidence_early2020.csv")
+
+#---------------------------------------------------Sky Blue font OK OK OK -----------------------------------
+
+# join county data from Jan 22 to May 1 with daily tweets
+
+state_tbl_complete_51_jan22_may1_fed <- fed_tbl_complete
+
+# state_tbl_complete_51_jan22_may1_fed <- fed_tbl_complete %>%
+#                                           dplyr::filter(corrected_time >= DATE1 & corrected_time <= DATE2)
+
+matched_entries_state_fed <- dplyr::inner_join(unmatched_entries_state_fed, state_tbl_complete_51_jan22_may1_fed,
+                                           by= c("date" = "corrected_time"))
+
+
+readr::write_csv(matched_entries_state_fed, "federal_tweets_covid_early2020.csv")
+
+
+#-------------------------------------------------Orange font OK OK OK --------------------------------------
+
+# join county data from Jan 22 to May 1 with daily facebook post
+
+state_tbl_complete_51_jan22_may1_fb_fed <- fed_tbl_complete_fb
+
+# state_tbl_complete_51_jan22_may1_fb_fed <- fed_tbl_complete_fb %>%
+#                                               dplyr::filter(corrected_time >= DATE1 & corrected_time <= DATE2)
+
+matched_entries_state_fb_fed <- dplyr::inner_join(unmatched_entries_state_fed, state_tbl_complete_51_jan22_may1_fb_fed,
+                                              by= c("date" = "corrected_time"))
+
+readr::write_csv(matched_entries_state_fb_fed, "federal_fb_covid_early2020.csv")
+
+
+#------------------------------------------------- purple font OK OK OK -------------------------------------
+
+# Join state_tweets_covid_early2020 with federal tweets
+
+matched_entries_state_fed <- matched_entries_state_fed %>%
+                            dplyr::rename("total_confirmed" = "confirmed",
+                                          "total_deaths" = "deaths",
+                                          "corrected_time" = "date") %>%
+                            dplyr::select(corrected_time, screen_name, name, total_daily_posts,
+                                          daily_favorite_count, daily_retweet_count, total_confirmed,
+                                          total_deaths)
+
+state_tweets_covid_full2020_fed <- dplyr::bind_rows(matched_entries_state_fed, fed_covid_2020) %>% 
+                                      dplyr::distinct(corrected_time, screen_name, .keep_all = T)
+
+readr::write_csv(state_tweets_covid_full2020_fed, "federal_tweets_covid_full2020.csv")
+
+#--------------------------------------------- Red font OK OK OK -------------------------------------------
+
+# Join state_tweets_covid_early2020 with state_fb_covid_2020
+
+matched_entries_state_fb_fed <- matched_entries_state_fb_fed %>%
+                                    dplyr::rename("total_confirmed" = "confirmed",
+                                                  "total_deaths" = "deaths",
+                                                  "corrected_time" = "date") %>%
+                                    dplyr::select(corrected_time, `User Name`, `Page Name`, total_daily_posts,
+                                                  daily_positive_eng, daily_negative_eng, daily_total_interactions, 
+                                                  daily_comments, daily_shares, total_confirmed, total_deaths)
+
+
+state_tweets_covid_full2020_fb_fed <- dplyr::bind_rows(matched_entries_state_fb_fed, fed_covid_2020_fb) %>% 
+                                    dplyr::distinct(corrected_time, `User Name`,  .keep_all = T)
+
+readr::write_csv(state_tweets_covid_full2020_fb_fed, "federal_fb_covid_full2020.csv")
