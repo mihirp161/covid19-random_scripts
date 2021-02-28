@@ -666,7 +666,7 @@ combined_local_inci <- combined_local_inci%>%
 readr::write_csv(combined_local_inci, "local_covid_incidence_2020.csv")
 
 
-#----------------------------------- Doing more with incidence data ----------------------------
+#-------------------------------------- Step 6 --------------------------------------
 
 # join the state complete tweets with state incidence
 state_covid_2020 <- dplyr::inner_join(state_tbl_complete, jhu_covid_data_state_51, by= c("corrected_time" = "Last_Update",
@@ -723,7 +723,7 @@ local_covid_2020_fb <- dplyr::inner_join(local_tbl_complete_fb, compressed_local
 
 readr::write_csv(local_covid_2020_fb, "local_fb_covid_2020.csv")
 
-#----------------------------------------- final steps -----------------------------------------
+#---------------------------------------- Step 7 -----------------------------------------
 
 # Creating state tweets/fb and covid file for early 2020
 setwd(paste0("./", "original-selected"))
