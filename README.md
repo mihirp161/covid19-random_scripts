@@ -29,7 +29,7 @@ This repository contains random scripts. You can pick them up as you find them u
 	* **only_in_fl**- gets the florida specific csvs only.   
 	* **dr_yu_ds** - makes a file Dr. Yu needs. It requires filtered csv files.   
 	* **dr_yu_mat**- makes a dfm() type matrix file for #tag frequency.    
-	* **pre_processing_health_study_nic**- performs data pre-processing for Dr Nic's health agency social engagement study.
+	* **pre_processing_health_study_nic_V5**- performs data pre-processing for Dr Nic's health agency social engagement study.
 * python (./python)
 	* **populate_bot_files** - Script for collecting Botometer scores from an output.csv *(this file contains 1 col usernames)*       
 	* **username_cutter** - Reads all the csv files based on a column and returns a big csv. If you want to split that csv
