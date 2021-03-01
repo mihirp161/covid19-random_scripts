@@ -273,88 +273,87 @@ remove_rows_missing_on_column <- function(tbl, column){
   return(tbl[all_vector, ])
 }
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ AS PER FEB 26 DIRECTION, NO NEED TO ADJUST TIMES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# # fix federal agencies
-# fed_tbl$corrected_time <-  fed_tbl$created_at - lubridate::hours(x= 5)
-# 
-# 
-# # clear the missing rows
-# state_tbl <- remove_rows_missing_on_column(state_tbl, c("gmt_difference"))
-# local_tbl <- remove_rows_missing_on_column(local_tbl, c("gmt_difference"))
-# 
-# 
-# # turn the values to positive vals
-# state_tbl$gmt_difference <- abs(state_tbl$gmt_difference)
-# local_tbl$gmt_difference <- abs(local_tbl$gmt_difference)
-# 
-# # attach the fixed times to designated tables
-# state_tbl$corrected_time <- state_tbl$created_at - lubridate::hours(x= state_tbl$gmt_difference)
-# 
-# local_tbl$corrected_time <- local_tbl$created_at - lubridate::hours(x= local_tbl$gmt_difference)
-# 
-# # write to the csvs
-# readr::write_csv(state_tbl, "state_tweets_joined_timed.csv")
-# readr::write_csv(fed_tbl, "federal_health_tweets_timed.csv")
-# readr::write_csv(local_tbl, "local_tweets_joined_timed.csv")
+# fix federal agencies
+fed_tbl$corrected_time <-  fed_tbl$created_at - lubridate::hours(x= 5)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# clear the missing rows
+state_tbl <- remove_rows_missing_on_column(state_tbl, c("gmt_difference"))
+local_tbl <- remove_rows_missing_on_column(local_tbl, c("gmt_difference"))
+
+
+# turn the values to positive vals
+state_tbl$gmt_difference <- abs(state_tbl$gmt_difference)
+local_tbl$gmt_difference <- abs(local_tbl$gmt_difference)
+
+# attach the fixed times to designated tables
+state_tbl$corrected_time <- state_tbl$created_at - lubridate::hours(x= state_tbl$gmt_difference)
+
+local_tbl$corrected_time <- local_tbl$created_at - lubridate::hours(x= local_tbl$gmt_difference)
+
+# write to the csvs
+readr::write_csv(state_tbl, "state_tweets_joined_timed.csv")
+readr::write_csv(fed_tbl, "federal_health_tweets_timed.csv")
+readr::write_csv(local_tbl, "local_tweets_joined_timed.csv")
+
+
 
 # aggregation measures (for Twitter)
 
 state_tbl_cut <- state_tbl %>%
-                    dplyr::select(created_at, screen_name, name, favorite_count, retweet_count, agency_name,
+                    dplyr::select(corrected_time, screen_name, name, favorite_count, retweet_count, agency_name,
                                          state, state_code, gov_party, state_pop_2010) %>%
-                    dplyr::mutate_at(vars(created_at), funs(as.Date))
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 
 local_tbl_cut <- local_tbl %>%
-                    dplyr::select(created_at, screen_name, name, favorite_count, retweet_count, agency_name,
+                    dplyr::select(corrected_time, screen_name, name, favorite_count, retweet_count, agency_name,
                                   state, city_gov_party_2020, city_pop, most_pop_city, county, state_gov_party)%>%
-                    dplyr::mutate_at(vars(created_at), funs(as.Date))
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 
 fed_tbl_cut <- fed_tbl %>%
-                    dplyr::select(created_at, screen_name, name, favorite_count, retweet_count)%>%
-                    dplyr::mutate_at(vars(created_at), funs(as.Date))
+                    dplyr::select(corrected_time, screen_name, name, favorite_count, retweet_count)%>%
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 # federal level
 fed_tbl_complete <- fed_tbl_cut %>%
-                      dplyr::group_by(created_at, screen_name, name) %>%
+                      dplyr::group_by(corrected_time, screen_name, name) %>%
                       dplyr::summarise(daily_favorite_count = toString(favorite_count),
                                        daily_retweet_count = toString(retweet_count)) %>%
                       dplyr::ungroup() %>% 
                       tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
-                      dplyr::group_by(created_at, screen_name, name) %>% 
-                      dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                      dplyr::group_by(corrected_time, screen_name, name) %>% 
+                      dplyr::summarise(total_daily_posts= dplyr::n(),
                                 daily_favorite_count = sum(daily_favorite_count),
                                 daily_retweet_count = sum(daily_retweet_count))
 
 # local level
 local_tbl_complete <- local_tbl_cut %>%
-                      dplyr::group_by(created_at, screen_name, name, agency_name,
+                      dplyr::group_by(corrected_time, screen_name, name, agency_name,
                                       state, county, state_gov_party, most_pop_city, city_gov_party_2020, city_pop) %>%
                       dplyr::summarise(daily_favorite_count = toString(favorite_count),
                                        daily_retweet_count = toString(retweet_count)) %>%
                       dplyr::ungroup() %>% 
                       tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
-                      dplyr::group_by(created_at, screen_name, name, agency_name,
+                      dplyr::group_by(corrected_time, screen_name, name, agency_name,
                                       state,county, state_gov_party, most_pop_city, city_gov_party_2020, city_pop) %>% 
-                      dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                      dplyr::summarise(total_daily_posts= dplyr::n(),
                                        daily_favorite_count = sum(daily_favorite_count),
                                        daily_retweet_count = sum(daily_retweet_count))
 
 # state level
 state_tbl_complete <- state_tbl_cut %>%
-                         dplyr::group_by(created_at, screen_name, name, agency_name,
+                         dplyr::group_by(corrected_time, screen_name, name, agency_name,
                                          state, state_code, gov_party, state_pop_2010) %>%
                          dplyr::summarise(daily_favorite_count = toString(favorite_count),
                                           daily_retweet_count = toString(retweet_count)) %>%
                          dplyr::ungroup() %>% 
                          tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
-                         dplyr::group_by(created_at, screen_name, name, agency_name,
+                         dplyr::group_by(corrected_time, screen_name, name, agency_name,
                                          state, state_code, gov_party, state_pop_2010) %>% 
-                         dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                         dplyr::summarise(total_daily_posts= dplyr::n(),
                                           daily_favorite_count = sum(daily_favorite_count),
                                           daily_retweet_count = sum(daily_retweet_count))
 
@@ -386,64 +385,61 @@ local_tbl_fb_eng_timed <- local_tbl_fb_eng_timed %>% dplyr::mutate(`User Name` =
 setdiff(factor(state_time_file$agency_fb_handle), factor(state_tbl_fb_eng_timed$`User Name`))
 setdiff(factor(local_time_file$agency_FB_handle), factor(local_tbl_fb_eng_timed$`User Name`))
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ AS PER FEB 26 DIRECTION, NO NEED TO ADJUST TIMES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# fix the federal hours
+fed_tbl_fb_eng_timed$corrected_time <- fed_tbl_fb_eng_timed$Created - lubridate::hours(x= 5)
 
-# # fix the federal hours
-# fed_tbl_fb_eng_timed$corrected_time <- fed_tbl_fb_eng_timed$Created - lubridate::hours(x= 5)
-# 
-# # clear the missing rows
-# state_tbl_fb_eng_timed <- remove_rows_missing_on_column(state_tbl_fb_eng_timed, c("gmt_difference"))
-# local_tbl_fb_eng_timed <- remove_rows_missing_on_column(local_tbl_fb_eng_timed, c("gmt_difference"))
-# 
-# 
-# # turn the values to positive vals
-# state_tbl_fb_eng_timed$gmt_difference <- abs(state_tbl_fb_eng_timed$gmt_difference)
-# local_tbl_fb_eng_timed$gmt_difference <- abs(local_tbl_fb_eng_timed$gmt_difference)
-# 
-# # attach the fixed times to designated tables
-# state_tbl_fb_eng_timed$corrected_time <- state_tbl_fb_eng_timed$Created - lubridate::hours(x= state_tbl_fb_eng_timed$gmt_difference)
-# 
-# local_tbl_fb_eng_timed$corrected_time <- local_tbl_fb_eng_timed$Created - lubridate::hours(x= local_tbl_fb_eng_timed$gmt_difference)
-# 
-# # write to the csvs
-# readr::write_csv(state_tbl_fb_eng_timed, "state_fb_joined_timed.csv")
-# readr::write_csv(fed_tbl_fb_eng_timed, "federal_fb_timed.csv")
-# readr::write_csv(local_tbl_fb_eng_timed, "local_fb_joined_timed.csv")
+# clear the missing rows
+state_tbl_fb_eng_timed <- remove_rows_missing_on_column(state_tbl_fb_eng_timed, c("gmt_difference"))
+local_tbl_fb_eng_timed <- remove_rows_missing_on_column(local_tbl_fb_eng_timed, c("gmt_difference"))
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# turn the values to positive vals
+state_tbl_fb_eng_timed$gmt_difference <- abs(state_tbl_fb_eng_timed$gmt_difference)
+local_tbl_fb_eng_timed$gmt_difference <- abs(local_tbl_fb_eng_timed$gmt_difference)
+
+# attach the fixed times to designated tables
+state_tbl_fb_eng_timed$corrected_time <- state_tbl_fb_eng_timed$Created - lubridate::hours(x= state_tbl_fb_eng_timed$gmt_difference)
+
+local_tbl_fb_eng_timed$corrected_time <- local_tbl_fb_eng_timed$Created - lubridate::hours(x= local_tbl_fb_eng_timed$gmt_difference)
+
+# write to the csvs
+readr::write_csv(state_tbl_fb_eng_timed, "state_fb_joined_timed.csv")
+readr::write_csv(fed_tbl_fb_eng_timed, "federal_fb_timed.csv")
+readr::write_csv(local_tbl_fb_eng_timed, "local_fb_joined_timed.csv")
+
 
 # aggregation measures (for Facebook
 
 state_tbl_fb_cut <- state_tbl_fb_eng_timed %>%
-                      dplyr::select(Created, `User Name`, `Page Name`, 
+                      dplyr::select(corrected_time, `User Name`, `Page Name`, 
                                     Likes, Love, Care, Wow, Haha,
                                     Sad, Angry, 
                                     `Total Interactions`, Comments, Shares, 
                                     state, state_code, gov_party, state_pop_2010) %>%
-                      dplyr::mutate_at(vars(Created), funs(as.Date))
+                      dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 
 local_tbl_fb_cut <- local_tbl_fb_eng_timed %>%
-                    dplyr::select(Created, `User Name`, `Page Name`, 
+                    dplyr::select(corrected_time, `User Name`, `Page Name`, 
                                   Likes, Love, Care, Wow, Haha,
                                   Sad, Angry, 
                                   `Total Interactions`, Comments, Shares, 
                                    city_gov_party_2020,
                                   city_pop, level, most_pop_city, county, state_gov_party)%>%
-                    dplyr::mutate_at(vars(Created), funs(as.Date))
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 
 fed_tbl_fb_cut <- fed_tbl_fb_eng_timed %>%
-                    dplyr::select(Created, `User Name`, `Page Name`, 
+                    dplyr::select(corrected_time, `User Name`, `Page Name`, 
                                   Likes, Love, Care, Wow, Haha,
                                   Sad, Angry, 
                                   `Total Interactions`, Comments, Shares)%>%
-                    dplyr::mutate_at(vars(Created), funs(as.Date))
+                    dplyr::mutate_at(vars(corrected_time), funs(as.Date))
 
 # federal level
 fed_tbl_complete_fb <- fed_tbl_fb_cut %>%
                           attach_eng() %>%
-                          dplyr::group_by(Created, `User Name`, `Page Name`) %>%
+                          dplyr::group_by(corrected_time, `User Name`, `Page Name`) %>%
                           dplyr::summarise(daily_positive_eng = toString(positive_eng),
                                            daily_negative_eng = toString(negative_eng),
                                            daily_total_interactions = toString(`Total Interactions`),
@@ -452,8 +448,8 @@ fed_tbl_complete_fb <- fed_tbl_fb_cut %>%
                           dplyr::ungroup() %>% 
                           tidyr::separate_rows(daily_positive_eng, daily_negative_eng, daily_total_interactions,
                                                daily_comments, daily_shares, convert = TRUE) %>% 
-                          dplyr::group_by(Created, `User Name`, `Page Name`) %>% 
-                          dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_shares),
+                          dplyr::group_by(corrected_time, `User Name`, `Page Name`) %>% 
+                          dplyr::summarise(total_daily_posts= dplyr::n(),
                                            daily_positive_eng = sum(daily_positive_eng),
                                            daily_negative_eng = sum(daily_negative_eng),
                                            daily_total_interactions = sum(daily_total_interactions),
@@ -464,7 +460,7 @@ fed_tbl_complete_fb <- fed_tbl_fb_cut %>%
 # local level
 local_tbl_complete_fb <- local_tbl_fb_cut %>%
                         attach_eng() %>%
-                        dplyr::group_by(Created, `User Name`, `Page Name`, 
+                        dplyr::group_by(corrected_time, `User Name`, `Page Name`, 
                                         most_pop_city, county, state_gov_party, city_gov_party_2020,
                                         city_pop, level) %>%
                         dplyr::summarise(daily_positive_eng = toString(positive_eng),
@@ -475,10 +471,10 @@ local_tbl_complete_fb <- local_tbl_fb_cut %>%
                         dplyr::ungroup() %>% 
                         tidyr::separate_rows(daily_positive_eng, daily_negative_eng, daily_total_interactions,
                                              daily_comments, daily_shares, convert = TRUE) %>% 
-                        dplyr::group_by(Created, `User Name`, `Page Name`, 
+                        dplyr::group_by(corrected_time, `User Name`, `Page Name`, 
                                         most_pop_city, county, state_gov_party, city_gov_party_2020,
                                         city_pop, level) %>% 
-                        dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_shares),
+                        dplyr::summarise(total_daily_posts= dplyr::n(),
                                          daily_positive_eng = sum(daily_positive_eng),
                                          daily_negative_eng = sum(daily_negative_eng),
                                          daily_total_interactions = sum(daily_total_interactions),
@@ -488,7 +484,7 @@ local_tbl_complete_fb <- local_tbl_fb_cut %>%
 # state level
 state_tbl_complete_fb <- state_tbl_fb_cut %>%
                           attach_eng() %>%
-                          dplyr::group_by(Created, `User Name`, `Page Name`, 
+                          dplyr::group_by(corrected_time, `User Name`, `Page Name`, 
                                           state, state_code, gov_party, state_pop_2010) %>%
                           dplyr::summarise(daily_positive_eng = toString(positive_eng),
                                            daily_negative_eng = toString(negative_eng),
@@ -498,9 +494,9 @@ state_tbl_complete_fb <- state_tbl_fb_cut %>%
                           dplyr::ungroup() %>% 
                           tidyr::separate_rows(daily_positive_eng, daily_negative_eng, daily_total_interactions,
                                                daily_comments, daily_shares, convert = TRUE) %>% 
-                          dplyr::group_by(Created, `User Name`, `Page Name`, 
+                          dplyr::group_by(corrected_time, `User Name`, `Page Name`, 
                                           state, state_code, gov_party, state_pop_2010) %>% 
-                          dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_shares),
+                          dplyr::summarise(total_daily_posts= dplyr::n(),
                                            daily_positive_eng = sum(daily_positive_eng),
                                            daily_negative_eng = sum(daily_negative_eng),
                                            daily_total_interactions = sum(daily_total_interactions),
@@ -514,17 +510,13 @@ readr::write_csv(local_tbl_complete_fb, "local_fb_daily_complete.csv")
 
 #------------------------------------------------------- Step 5 ---------------------------------------
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ AS PER FEB 26 DIRECTION, NO NEED TO USE JHU DATA STATE ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+setwd(paste0("./", "original-selected"))
+setwd(paste0("./", "JHU_covid_data_state"))
 
+filenames <- list.files(pattern="*.csv", full.names=TRUE)
 
-# setwd(paste0("./", "original-selected"))
-# setwd(paste0("./", "JHU_covid_data_state"))
-# 
-# filenames <- list.files(pattern="*.csv", full.names=TRUE)
-# 
-# 
-# setwd("..")
-# setwd("..")
+setwd("..")
+setwd("..")
 
 
 # integrate state covid incidence data into one file
@@ -548,17 +540,21 @@ DATE2 <- as.Date("2020-12-31")
 jhu_covid_data_state_cut <- jhu_covid_data_state_cut%>%
                               dplyr::filter(Last_Update >= DATE1 & Last_Update <= DATE2)
 
-
+#~~~~~~~~~~~~~~~ CAUTION: THERE ARE TWO FLORIDAS FOR 2020-04-14 SO SUMS ARE UP FOR THIS DATE!!!! ~~~~~~~~~~~~~~
 jhu_covid_data_state_51 <- jhu_covid_data_state_cut %>%
                              dplyr::group_by(Last_Update, Province_State) %>%
                              dplyr::summarise(total_confirmed = toString(Confirmed),
-                                              total_deaths = toString(Deaths)) %>%
+                                               total_deaths = toString(Deaths)) %>%
                              dplyr::ungroup()%>%
-                             tidyr::separate_rows(total_confirmed, total_deaths, convert = TRUE)
+                             tidyr::separate_rows(total_confirmed, total_deaths, convert = TRUE) %>%
+                             dplyr::group_by(Last_Update, Province_State) %>%
+                             dplyr::summarise(total_confirmed= sum(total_confirmed),
+                                              total_deaths = sum(total_deaths))
   
+
 readr::write_csv(jhu_covid_data_state_51, "state_covid_incidence_2020.csv")
 
-
+#~~~~~~~~~~~~~~~ CAUTION: THERE ARE TWO FLORIDAS FOR 2020-04-14 SO SUMS ARE UP FOR THIS DATE!!!! ~~~~~~~~~~~~~~
 
 # create federal covid incidence file
 jhu_covid_data_fed_51 <- jhu_covid_data_state_cut %>%
@@ -596,8 +592,6 @@ setwd(paste0("./", "JHU_covid_data_state"))
 
 filenames <- list.files(pattern="*.csv", full.names=TRUE)
 jhu_data_state <- lapply(filenames, readr::read_csv)
-
-
 
 
 setwd("..")
@@ -778,7 +772,7 @@ setwd("..")
 readr::write_csv(ts_state_2020, "state_covid_incidence_early2020_test.csv")
 
 
-#-------------------------------------Compare the JHU figures -------------------------------------
+# Compare the JHU figures
 
 # full join the JHU dataset to JHU county dataset for record purpose
 DATE1 <- as.Date("2020-04-12")
@@ -990,3 +984,4 @@ state_tweets_covid_full2020_fb_fed <- dplyr::bind_rows(matched_entries_state_fb_
                                     dplyr::distinct(corrected_time, `User Name`,  .keep_all = T)
 
 readr::write_csv(state_tweets_covid_full2020_fb_fed, "federal_fb_covid_full2020.csv")
+
