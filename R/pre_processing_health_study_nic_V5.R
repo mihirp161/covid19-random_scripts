@@ -300,7 +300,7 @@ fed_tbl_complete <- fed_tbl_cut %>%
                       dplyr::ungroup() %>% 
                       tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
                       dplyr::group_by(created_at, screen_name, name) %>% 
-                      dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                      dplyr::summarise(total_daily_posts= dplyr::n(),
                                        daily_favorite_count = sum(daily_favorite_count),
                                        daily_retweet_count = sum(daily_retweet_count))
 
@@ -314,7 +314,7 @@ local_tbl_complete <- local_tbl_cut %>%
                         tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
                         dplyr::group_by(created_at, screen_name, name, agency_name,
                                         state,county, state_gov_party, most_pop_city, city_gov_party_2020, city_pop) %>% 
-                        dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                        dplyr::summarise(total_daily_posts= dplyr::n(),
                                          daily_favorite_count = sum(daily_favorite_count),
                                          daily_retweet_count = sum(daily_retweet_count))
 
@@ -328,7 +328,7 @@ state_tbl_complete <- state_tbl_cut %>%
                         tidyr::separate_rows(daily_favorite_count,daily_retweet_count , convert = TRUE) %>% 
                         dplyr::group_by(created_at, screen_name, name, agency_name,
                                         state, state_code, gov_party, state_pop_2010) %>% 
-                        dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_favorite_count),
+                        dplyr::summarise(total_daily_posts= dplyr::n(),
                                          daily_favorite_count = sum(daily_favorite_count),
                                          daily_retweet_count = sum(daily_retweet_count))
 
@@ -404,7 +404,7 @@ fed_tbl_complete_fb <- fed_tbl_fb_cut %>%
                           tidyr::separate_rows(daily_positive_eng, daily_negative_eng, daily_total_interactions,
                                                daily_comments, daily_shares, convert = TRUE) %>% 
                           dplyr::group_by(Created, `User Name`, `Page Name`) %>% 
-                          dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_shares),
+                          dplyr::summarise(total_daily_posts= dplyr::n(),
                                            daily_positive_eng = sum(daily_positive_eng),
                                            daily_negative_eng = sum(daily_negative_eng),
                                            daily_total_interactions = sum(daily_total_interactions),
@@ -429,7 +429,7 @@ local_tbl_complete_fb <- local_tbl_fb_cut %>%
                             dplyr::group_by(Created, `User Name`, `Page Name`, 
                                             most_pop_city, county, state_gov_party, city_gov_party_2020,
                                             city_pop, level) %>% 
-                            dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_shares),
+                            dplyr::summarise(total_daily_posts= dplyr::n(),
                                              daily_positive_eng = sum(daily_positive_eng),
                                              daily_negative_eng = sum(daily_negative_eng),
                                              daily_total_interactions = sum(daily_total_interactions),
@@ -451,7 +451,7 @@ state_tbl_complete_fb <- state_tbl_fb_cut %>%
                                                  daily_comments, daily_shares, convert = TRUE) %>% 
                             dplyr::group_by(Created, `User Name`, `Page Name`, 
                                             state, state_code, gov_party, state_pop_2010) %>% 
-                            dplyr::summarise(total_daily_posts= dplyr::n_distinct(daily_shares),
+                            dplyr::summarise(total_daily_posts= dplyr::n(),
                                              daily_positive_eng = sum(daily_positive_eng),
                                              daily_negative_eng = sum(daily_negative_eng),
                                              daily_total_interactions = sum(daily_total_interactions),
@@ -484,26 +484,12 @@ jhu_death <- dplyr::rename(jhu_death,
                             c("county"= "Admin2", "state" = "Province_State"))
 #-------------------- melt confirm df
 
-# jhu_confirmed_newDaily <- reshape2::melt(jhu_confirmed %>%
-#                                            dplyr::select(
-#                                              -c("UID","iso2","iso3","code3","FIPS",
-#                                                 "Country_Region","Lat","Long_","Combined_Key")),
-#                                          id.vars=c("county","state"))%>%
-#                             dplyr::rename("date"="variable" , "confirmed"= "value" )
-
 jhu_confirmed_newDaily <- reshape2::melt(jhu_confirmed,
                                          id.vars=c("county","state",
                                                    "UID","iso2","iso3","code3","FIPS",
                                                    "Country_Region","Lat","Long_","Combined_Key"))%>%
                           dplyr::rename("date"="variable" , "confirmed"= "value" ) 
 
-
-
-# jhu_confirmed_newDaily <- jhu_confirmed_newDaily %>%
-#                             dplyr::group_by(county, state) %>%
-#                             dplyr::arrange(date) %>%
-#                             dplyr::mutate(confirmed = confirmed - dplyr::lag(confirmed, 
-#                                                                              default = dplyr::first(confirmed)))
 
 jhu_confirmed_newDaily <- jhu_confirmed_newDaily %>%
                             dplyr::group_by(county, state,
@@ -528,25 +514,12 @@ readr::write_csv(csv_jhu_confirmed_newDaily, "covid19_confirmed_US_newDaily.csv"
 
 #-------------------- melt death df
 
-# jhu_deaths_newDaily <- reshape2::melt(jhu_death %>%
-#                                            dplyr::select(
-#                                              -c("UID", "iso2", "iso3", "code3", "FIPS",
-#                                                 "Country_Region", "Lat", "Long_", "Combined_Key", "Population")),
-#                                          id.vars=c("county","state"))%>%
-#                             dplyr::rename("date"="variable" , "deaths"= "value" )
-
 jhu_deaths_newDaily <- reshape2::melt(jhu_death,
                                          id.vars=c("county","state",
                                                    "UID", "iso2", "iso3", "code3", "FIPS",
                                                    "Country_Region", "Lat", "Long_", "Combined_Key", "Population"))%>%
                                     dplyr::rename("date"="variable" , "deaths"= "value" )
 
-
-# jhu_deaths_newDaily <- jhu_deaths_newDaily %>%
-#                             dplyr::group_by(county, state) %>%
-#                             dplyr::arrange(date) %>%
-#                             dplyr::mutate(deaths = deaths - dplyr::lag(deaths,
-#                                                                         default = dplyr::first(deaths)))
 
 jhu_deaths_newDaily <- jhu_deaths_newDaily %>%
                             dplyr::group_by(county, state,
@@ -588,14 +561,13 @@ jhu_incidence <- dplyr::inner_join(jhu_confirmed_newDaily_ranged, jhu_deaths_new
                                     by= c("county" = "county", "state" = "state", "date"="date")) %>%
                           tidyr::drop_na()
 
+readr::write_csv(jhu_incidence, "incidence_2020.csv")
 
 jhu_incidence_state <- jhu_incidence %>% 
                         dplyr::select(-county) %>%
                         dplyr::group_by(date, state) %>%
-                        dplyr::summarise(total_confirmed = toString(confirmed),
-                                         total_deaths = toString(deaths)) %>%
-                        dplyr::ungroup()%>%
-                        tidyr::separate_rows(total_confirmed, total_deaths, convert = TRUE, sep = ",")
+                        dplyr::summarise(total_confirmed = sum(confirmed),
+                                         total_deaths = sum(deaths))
 
 
 readr::write_csv(jhu_incidence_state, "state_covid_incidence_2020.csv")
@@ -605,14 +577,8 @@ readr::write_csv(jhu_incidence_state, "state_covid_incidence_2020.csv")
 jhu_incidence_fed <- jhu_incidence %>% 
                         dplyr::select(-c(county,state)) %>%
                         dplyr::group_by(date) %>%
-                        dplyr::summarise(total_confirmed = toString(confirmed),
-                                         total_deaths = toString(deaths)) %>%
-                        dplyr::ungroup()%>%
-                        tidyr::separate_rows(total_confirmed, total_deaths, convert = TRUE, sep = ",") %>%
-                        dplyr::group_by(date) %>%
-                        dplyr::summarise(total_confirmed= sum(total_confirmed),
-                                         total_deaths = sum(total_deaths))
-
+                        dplyr::summarise(total_confirmed = sum(confirmed),
+                                         total_deaths = sum(deaths))
 
 readr::write_csv(jhu_incidence_fed, "federal_covid_incidence_2020.csv")
 
