@@ -39,7 +39,7 @@ tbl_maker <- function(main_dir, sub_dir, which_files, go_back_this_many, date_co
   
   tbl[ ,date_col_name] <- as.POSIXct(tbl[[date_col_name]],
                                           format="%Y-%m-%d %H:%M:%S", tz = "GMT") #re-classify datatype to dates, twitter is in GMT
-
+  
   lapply(seq_len(go_back_this_many), function(x) go_back()) #run function n times
   
   return(tbl)
@@ -86,6 +86,8 @@ state_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected",
                                         go_back_this_many= 2,
                                         date_col_name= "created_at"))
 
+# remove the rows that are retweeted
+state_tbl <- state_tbl[!(state_tbl[["is_retweet"]] == TRUE), ]
 
 count_dups(state_tbl, "status_id")
 
@@ -113,6 +115,9 @@ local_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected",
                                         go_back_this_many= 2,
                                         date_col_name= "created_at"))
 
+# remove the rows that are retweeted
+local_tbl <- local_tbl[!(local_tbl[["is_retweet"]] == TRUE), ]
+
 count_dups(local_tbl, "status_id")
 
 local_tbl <- remove_dups(local_tbl, "status_id")
@@ -127,10 +132,14 @@ readr::write_csv(local_tbl, "local_health_tweets_2020.csv")
 # Federal level
 
 fed_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected", 
-                                        sub_dir= "fed_health_tweets_2020-2021",
-                                        which_files= "tweet",
-                                        go_back_this_many= 2,
-                                        date_col_name= "created_at"))
+                                      sub_dir= "fed_health_tweets_2020-2021",
+                                      which_files= "tweet",
+                                      go_back_this_many= 2,
+                                      date_col_name= "created_at"))
+
+# remove the rows that are retweeted
+fed_tbl <- fed_tbl[!(fed_tbl[["is_retweet"]] == TRUE), ]
+
 
 count_dups(fed_tbl, "status_id")
 
@@ -541,6 +550,7 @@ jhu_covid_data_state_cut <- jhu_covid_data_state_cut%>%
                               dplyr::filter(Last_Update >= DATE1 & Last_Update <= DATE2)
 
 #~~~~~~~~~~~~~~~ CAUTION: THERE ARE TWO FLORIDAS FOR 2020-04-14 SO SUMS ARE UP FOR THIS DATE!!!! ~~~~~~~~~~~~~~
+
 jhu_covid_data_state_51 <- jhu_covid_data_state_cut %>%
                              dplyr::group_by(Last_Update, Province_State) %>%
                              dplyr::summarise(total_confirmed = toString(Confirmed),

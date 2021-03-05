@@ -12,6 +12,7 @@ library(readxl)
 library(rio)
 library(lubridate)
 library(data.table)
+library(reshape2)
 
 # rollback the directory
 go_back <- function(){
@@ -25,7 +26,7 @@ count_dups <- function(tbl, column){
 
 
 # returns a dataframe with all files combined
-tbl_maker <- function(main_dir, sub_dir, which_files, go_back_this_many, date_col_name, remove_unknown= TRUE){
+tbl_maker <- function(main_dir, sub_dir, which_files, go_back_this_many, date_col_name, is_retweet_col_name, remove_unknown= TRUE){
   
   setwd(paste0("./", main_dir)) # set the directories
   setwd(paste0("./", sub_dir))
@@ -39,6 +40,9 @@ tbl_maker <- function(main_dir, sub_dir, which_files, go_back_this_many, date_co
   
   tbl[ ,date_col_name] <- as.POSIXct(tbl[[date_col_name]],
                                      format="%Y-%m-%d %H:%M:%S", tz = "GMT") #re-classify datatype to dates, twitter is in GMT
+  
+  # remove the rows that are retweeted
+  tbl <- tbl[!(tbl[[is_retweet_col_name]] == TRUE), ]
   
   lapply(seq_len(go_back_this_many), function(x) go_back()) #run function n times
   
@@ -79,12 +83,14 @@ state_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected",
                                         sub_dir= "state_health_tweets_2020_12_07",
                                         which_files= "tweet",
                                         go_back_this_many= 2,
-                                        date_col_name= "created_at"), 
+                                        date_col_name= "created_at",
+                                        is_retweet_col_name = "is_retweet"), 
                               tbl_maker(main_dir= "original-selected", 
                                         sub_dir= "state_health_tweets_2021_01_07",
                                         which_files= "tweet",
                                         go_back_this_many= 2,
-                                        date_col_name= "created_at"))
+                                        date_col_name= "created_at",
+                                        is_retweet_col_name = "is_retweet"))
 
 
 count_dups(state_tbl, "status_id")
@@ -105,12 +111,14 @@ local_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected",
                                         sub_dir= "local_health_tweets_2020_12_14",
                                         which_files= "tweet",
                                         go_back_this_many= 2,
-                                        date_col_name= "created_at"), 
+                                        date_col_name= "created_at",
+                                        is_retweet_col_name = "is_retweet"), 
                               tbl_maker(main_dir= "original-selected", 
                                         sub_dir= "local_health_tweets_2021_01_07",
                                         which_files= "tweet",
                                         go_back_this_many= 2,
-                                        date_col_name= "created_at"))
+                                        date_col_name= "created_at",
+                                        is_retweet_col_name = "is_retweet"))
 
 count_dups(local_tbl, "status_id")
 
@@ -129,7 +137,8 @@ fed_tbl <- dplyr::bind_rows(tbl_maker(main_dir= "original-selected",
                                       sub_dir= "fed_health_tweets_2020-2021",
                                       which_files= "tweet",
                                       go_back_this_many= 2,
-                                      date_col_name= "created_at"))
+                                      date_col_name= "created_at",
+                                      is_retweet_col_name = "is_retweet"))
 
 count_dups(fed_tbl, "status_id")
 
