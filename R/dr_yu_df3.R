@@ -108,6 +108,6 @@ right_shell_df <- right_shell_df %>%
                     dplyr::select(-freq, -user.id_str)
 
 #write to excel
-readr::write_excel_csv(right_shell_df, "drYu_ds3_month.R")
+readr::write_excel_csv(right_shell_df, "drYu_ds3_month.csv")
 
 #EOF
